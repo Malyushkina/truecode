@@ -27,8 +27,8 @@ let ProductsRepository = class ProductsRepository {
         const [products, total] = await Promise.all([
             this.prisma.product.findMany({
                 where,
-                skip,
-                take: limit,
+                skip: Number(skip),
+                take: Number(limit),
                 orderBy: { [sortBy]: sortOrder },
             }),
             this.prisma.product.count({ where }),

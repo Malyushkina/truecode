@@ -16,13 +16,19 @@ export enum SortOrder {
 export class QueryProductsDto {
   /** Номер страницы (по умолчанию 1) */
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => {
+    const parsed = parseInt(value);
+    return isNaN(parsed) ? 1 : parsed;
+  })
   @IsNumber()
   page?: number = 1;
 
   /** Количество товаров на странице (по умолчанию 10) */
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => {
+    const parsed = parseInt(value);
+    return isNaN(parsed) ? 10 : parsed;
+  })
   @IsNumber()
   limit?: number = 10;
 

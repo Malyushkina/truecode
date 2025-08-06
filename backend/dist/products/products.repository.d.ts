@@ -6,6 +6,7 @@ export declare class ProductsRepository {
     private prisma;
     constructor(prisma: PrismaService);
     create(data: CreateProductDto): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -13,11 +14,11 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     findMany(query: QueryProductsDto): Promise<{
         products: {
+            id: string;
             name: string;
             description: string | null;
             price: number;
@@ -25,12 +26,12 @@ export declare class ProductsRepository {
             sku: string;
             imageUrl: string | null;
             createdAt: Date;
-            id: string;
             updatedAt: Date;
         }[];
         total: number;
     }>;
     findById(id: string): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -38,10 +39,10 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     } | null>;
     update(id: string, data: UpdateProductDto): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -49,10 +50,10 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     delete(id: string): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -60,7 +61,6 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     private buildWhereClause;

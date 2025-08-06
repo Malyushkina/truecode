@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 /**
@@ -8,6 +9,15 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   // Создаем экземпляр приложения из главного модуля
   const app = await NestFactory.create(AppModule);
+
+  // Добавляем глобальную валидацию
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // Запускаем сервер на указанном порту
   // Если PORT не указан в переменных окружения, используем 3000

@@ -6,6 +6,7 @@ export declare class ProductsService {
     private repository;
     constructor(repository: ProductsRepository);
     create(createProductDto: CreateProductDto): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -13,11 +14,11 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     findAll(query: QueryProductsDto): Promise<{
         products: {
+            id: string;
             name: string;
             description: string | null;
             price: number;
@@ -25,7 +26,6 @@ export declare class ProductsService {
             sku: string;
             imageUrl: string | null;
             createdAt: Date;
-            id: string;
             updatedAt: Date;
         }[];
         pagination: {
@@ -36,6 +36,7 @@ export declare class ProductsService {
         };
     }>;
     findOne(id: string): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -43,10 +44,10 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     update(id: string, updateProductDto: UpdateProductDto): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -54,10 +55,10 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
     remove(id: string): Promise<{
+        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -65,7 +66,6 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
-        id: string;
         updatedAt: Date;
     }>;
 }

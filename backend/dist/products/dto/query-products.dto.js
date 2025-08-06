@@ -29,13 +29,19 @@ class QueryProductsDto {
 exports.QueryProductsDto = QueryProductsDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(({ value }) => parseInt(value)),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        const parsed = parseInt(value);
+        return isNaN(parsed) ? 1 : parsed;
+    }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], QueryProductsDto.prototype, "page", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(({ value }) => parseInt(value)),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        const parsed = parseInt(value);
+        return isNaN(parsed) ? 10 : parsed;
+    }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], QueryProductsDto.prototype, "limit", void 0);
