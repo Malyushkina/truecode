@@ -1,13 +1,11 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { UpdateProductDto } from '../../../src/products/dto/update-product.dto';
-import { CreateProductDto } from '../../../src/products/dto/create-product.dto';
 
 describe('UpdateProductDto', () => {
   describe('наследование от CreateProductDto', () => {
     it('должен иметь те же поля что и CreateProductDto', () => {
       const updateDto = new UpdateProductDto();
-      const createDto = new CreateProductDto();
 
       // Проверяем что UpdateProductDto наследует от CreateProductDto
       expect(updateDto).toBeInstanceOf(Object);

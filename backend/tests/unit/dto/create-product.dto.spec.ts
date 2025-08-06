@@ -1,5 +1,4 @@
 import { validate } from 'class-validator';
-import { plainToClass } from 'class-transformer';
 import { CreateProductDto } from '../../../src/products/dto/create-product.dto';
 
 describe('CreateProductDto', () => {

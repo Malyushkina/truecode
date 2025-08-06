@@ -79,8 +79,8 @@ describe('ProductsController (Enhanced Integration)', () => {
       const expectedProduct = {
         id: 'test-id',
         ...createProductDto,
-        createdAt: expect.anything(),
-        updatedAt: expect.anything(),
+        createdAt: expect.anything() as unknown,
+        updatedAt: expect.anything() as unknown,
       };
 
       mockService.create.mockResolvedValue(expectedProduct);

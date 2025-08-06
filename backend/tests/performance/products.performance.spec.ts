@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from '../../src/products/products.service';
 import { ProductsRepository } from '../../src/products/products.repository';
 import { CreateProductDto } from '../../src/products/dto/create-product.dto';
-import { QueryProductsDto } from '../../src/products/dto/query-products.dto';
+import {
+  QueryProductsDto,
+  SortOrder,
+} from '../../src/products/dto/query-products.dto';
 
 describe('Products Performance Tests', () => {
   let service: ProductsService;
@@ -117,7 +120,7 @@ describe('Products Performance Tests', () => {
         minPrice: 100,
         maxPrice: 500,
         sortBy: 'price',
-        sortOrder: 'asc',
+        sortOrder: SortOrder.ASC,
       };
 
       const mockResult = {
@@ -268,7 +271,7 @@ describe('Products Performance Tests', () => {
     });
 
     it('должен обрабатывать множественные операции CRUD', async () => {
-      const operations = [];
+      const operations: Promise<any>[] = [];
 
       // Создание
       for (let i = 0; i < 10; i++) {

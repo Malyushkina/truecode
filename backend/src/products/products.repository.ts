@@ -101,22 +101,22 @@ export class ProductsRepository {
     minPrice?: number,
     maxPrice?: number,
   ) {
-    const conditions: any[] = [];
+    const conditions: Array<Record<string, unknown>> = [];
 
     // Добавляем поиск по названию, описанию и артикулу
     if (search) {
       conditions.push({
         OR: [
-          { name: { contains: search, mode: 'insensitive' as any } },
-          { description: { contains: search, mode: 'insensitive' as any } },
-          { sku: { contains: search, mode: 'insensitive' as any } },
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { description: { contains: search, mode: 'insensitive' as const } },
+          { sku: { contains: search, mode: 'insensitive' as const } },
         ],
       });
     }
 
     // Добавляем фильтрацию по цене
     if (minPrice || maxPrice) {
-      const priceCondition: any = {};
+      const priceCondition: Record<string, number> = {};
       if (minPrice && !isNaN(minPrice)) priceCondition.gte = Number(minPrice);
       if (maxPrice && !isNaN(maxPrice)) priceCondition.lte = Number(maxPrice);
       conditions.push({ price: priceCondition });

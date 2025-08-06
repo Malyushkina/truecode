@@ -17,7 +17,7 @@ export class QueryProductsDto {
   /** Номер страницы (по умолчанию 1) */
   @IsOptional()
   @Transform(({ value }) => {
-    const parsed = parseInt(value);
+    const parsed = parseInt(value as string);
     return isNaN(parsed) ? 1 : parsed;
   })
   @IsNumber()
@@ -26,7 +26,7 @@ export class QueryProductsDto {
   /** Количество товаров на странице (по умолчанию 10) */
   @IsOptional()
   @Transform(({ value }) => {
-    const parsed = parseInt(value);
+    const parsed = parseInt(value as string);
     return isNaN(parsed) ? 10 : parsed;
   })
   @IsNumber()
@@ -50,7 +50,7 @@ export class QueryProductsDto {
   /** Минимальная цена для фильтрации */
   @IsOptional()
   @Transform(({ value }) => {
-    const parsed = parseFloat(value);
+    const parsed = parseFloat(value as string);
     return isNaN(parsed) ? undefined : parsed;
   })
   @IsNumber()
@@ -59,7 +59,7 @@ export class QueryProductsDto {
   /** Максимальная цена для фильтрации */
   @IsOptional()
   @Transform(({ value }) => {
-    const parsed = parseFloat(value);
+    const parsed = parseFloat(value as string);
     return isNaN(parsed) ? undefined : parsed;
   })
   @IsNumber()

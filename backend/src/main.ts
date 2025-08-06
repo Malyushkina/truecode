@@ -25,4 +25,4 @@ async function bootstrap() {
 }
 
 // Запускаем приложение
-bootstrap();
+void bootstrap();
