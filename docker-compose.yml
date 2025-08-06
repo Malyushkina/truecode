@@ -1,58 +1,65 @@
+# Docker Compose конфигурация для проекта TrueCode
+# Определяет все сервисы приложения: база данных, backend и frontend
 version: '3.8'
 
 services:
+  # PostgreSQL база данных
   postgres:
-    image: postgres:15
+    image: postgres:15 # Используем PostgreSQL версии 15
     container_name: truecode_postgres
     environment:
-      POSTGRES_DB: truecode
-      POSTGRES_USER: truecode
-      POSTGRES_PASSWORD: truecode
+      POSTGRES_DB: postgres # Временная база для инициализации
+      POSTGRES_USER: postgres # Временный пользователь для инициализации
+      POSTGRES_PASSWORD: postgres # Временный пароль для инициализации
     ports:
-      - '5433:5432'
+      - '5433:5432' # Проброс порта (локальный:контейнер)
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Постоянное хранение данных
     networks:
-      - truecode_network
+      - truecode_network # Подключение к внутренней сети
 
+  # Backend сервер (NestJS API)
   backend:
     build:
-      context: ./backend
+      context: ./backend # Контекст сборки
       dockerfile: Dockerfile
     container_name: truecode_backend
     ports:
-      - '3001:3001'
+      - '3001:3001' # Backend API на порту 3001
     environment:
-      DATABASE_URL: postgresql://truecode:truecode@postgres:5432/truecode
-      NODE_ENV: development
+      DATABASE_URL: postgresql://truecode:truecode@postgres:5432/truecode # Строка подключения к БД
+      NODE_ENV: development # Режим разработки
     depends_on:
-      - postgres
+      - postgres # Зависимость от базы данных
     networks:
       - truecode_network
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app # Монтирование кода для hot reload
+      - /app/node_modules # Исключение node_modules
 
+  # Frontend приложение (Next.js)
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend # Контекст сборки
       dockerfile: Dockerfile
     container_name: truecode_frontend
     ports:
-      - '3000:3000'
+      - '3000:3000' # Frontend на порту 3000
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001 # URL API для frontend
     depends_on:
-      - backend
+      - backend # Зависимость от backend
     networks:
       - truecode_network
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app # Монтирование кода для hot reload
+      - /app/node_modules # Исключение node_modules
 
+# Тома для постоянного хранения данных
 volumes:
-  postgres_data:
+  postgres_data: # Том для данных PostgreSQL
 
+# Сети для связи между контейнерами
 networks:
   truecode_network:
-    driver: bridge
+    driver: bridge # Тип сети
