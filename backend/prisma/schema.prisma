@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  /// Уникальный ID записи
+  id String @id @default(cuid())
+  
+  /// Название товара
+  name String
+  
+  /// Описание товара
+  description String?
+  
+  /// Основная цена
+  price Float
+  
+  /// Цена со скидкой
+  discountPrice Float?
+  
+  /// Артикул товара (уникальный)
+  sku String @unique
+  
+  /// Путь к изображению
+  imageUrl String?
+  
+  /// Дата создания
+  createdAt DateTime @default(now())
+  
+  /// Дата обновления
+  updatedAt DateTime @updatedAt
+}

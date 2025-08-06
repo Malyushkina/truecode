@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: truecode_postgres
+    environment:
+      POSTGRES_DB: truecode
+      POSTGRES_USER: truecode
+      POSTGRES_PASSWORD: truecode
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - truecode_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: truecode_backend
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://truecode:truecode@postgres:5432/truecode
+      NODE_ENV: development
+    depends_on:
+      - postgres
+    networks:
+      - truecode_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: truecode_frontend
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - truecode_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  truecode_network:
+    driver: bridge
