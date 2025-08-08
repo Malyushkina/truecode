@@ -11,8 +11,7 @@ import {
  * API клиент для работы с backend
  * Использует axios для HTTP запросов
  */
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL || 'https://truecode.onrender.com';
+const apiBaseUrl = 'https://truecode.onrender.com';
 const api = axios.create({
   baseURL: apiBaseUrl,
   headers: {
