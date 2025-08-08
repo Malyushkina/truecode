@@ -30,6 +30,8 @@ async function bootstrap() {
           'https://truecode-frontend.vercel.app',
         ];
 
+    console.log('🌍 Allowed Origins:', allowedOrigins);
+
     // Настраиваем CORS для разрешения запросов с frontend
     app.enableCors({
       origin: allowedOrigins,
