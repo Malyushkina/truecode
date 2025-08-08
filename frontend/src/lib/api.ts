@@ -14,6 +14,14 @@ import {
 const apiBaseUrl = 'https://truecode.onrender.com';
 
 console.log('🔧 API Base URL:', apiBaseUrl);
+console.log('🔧 Environment:', process.env.NODE_ENV);
+console.log('🔧 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+
+// Принудительно проверяем URL
+if (apiBaseUrl.includes('localhost')) {
+  console.error('❌ ERROR: Using localhost URL!');
+  throw new Error('Using localhost URL in production!');
+}
 
 const api = axios.create({
   baseURL: apiBaseUrl,

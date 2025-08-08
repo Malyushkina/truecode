@@ -20,6 +20,10 @@ export default function HomePage() {
     sortOrder: 'desc',
   });
 
+  // Отладочная информация
+  console.log('🔧 Component loaded');
+  console.log('🔧 API URL from lib:', process.env.NEXT_PUBLIC_API_URL);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['products', filters],
     queryFn: () => productsApi.getProducts(filters),
