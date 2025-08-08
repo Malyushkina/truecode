@@ -3,8 +3,8 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "npm run db:migrate && npm run start:prod"
-healthcheckPath = "/"
-healthcheckTimeout = 600  # Увеличить с 300 до 600 секунд
+# healthcheckPath = "/"  # Закомментировать
+healthcheckTimeout = 300  # Увеличить с 300 до 600 секунд
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
