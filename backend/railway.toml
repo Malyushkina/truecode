@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "npx prisma migrate deploy && echo '--- Printing environment variables ---' && printenv && echo '--- Starting application ---' && npm run start:prod"
+startCommand = "npx prisma migrate deploy && echo 'Container is sleeping for 1 hour for debugging purposes.' && sleep 3600"
 # healthcheckPath = "/api/health" # Рекомендуется добавить эндпоинт для проверки здоровья
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
