@@ -11,7 +11,7 @@ import {
  * API клиент для работы с backend
  * Использует axios для HTTP запросов
  */
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 const api = axios.create({
   baseURL: apiBaseUrl,
   headers: {

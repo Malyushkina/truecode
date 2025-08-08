@@ -12,13 +12,20 @@ async function bootstrap() {
   // Создаем экземпляр приложения из главного модуля
   const app = await NestFactory.create(AppModule);
 
+  // Получаем разрешенные origins из переменных окружения
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : [
+        'http://localhost:3000',
+        'http://localhost:3002',
+        'http://localhost:3001',
+        'https://your-frontend-domain.vercel.app', // Замените на ваш домен
+        'https://truecode-frontend.vercel.app', // Пример домена
+      ];
+
   // Настраиваем CORS для разрешения запросов с frontend
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3002',
-      'http://localhost:3001',
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -38,7 +45,10 @@ async function bootstrap() {
 
   // Запускаем сервер на указанном порту
   // Если PORT не указан в переменных окружения, используем 3000
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  console.log(`🚀 Приложение запущено на порту ${port}`);
+  console.log(`🌍 Режим: ${process.env.NODE_ENV || 'development'}`);
 }
 
 // Запускаем приложение

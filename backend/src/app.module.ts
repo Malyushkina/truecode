@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
+import { PrismaModule } from './prisma/prisma.module';
 
-/**
- * Главный модуль приложения
- * Объединяет все модули и компоненты приложения
- * Является корневым модулем NestJS приложения
- */
 @Module({
   imports: [
-    PrismaModule, // Модуль для работы с базой данных
-    ProductsModule, // Модуль для работы с товарами
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
+    }),
+    PrismaModule,
+    ProductsModule,
   ],
-  controllers: [AppController], // Главный контроллер приложения
-  providers: [AppService], // Главный сервис приложения
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
