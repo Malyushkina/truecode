@@ -24,13 +24,10 @@ export default function HomePage() {
     queryKey: ['products', filters],
     queryFn: () => productsApi.getProducts(filters),
     retry: 1,
-    onError: (error) => {
-      console.error('API Error:', error);
-    },
-    onSuccess: (data) => {
-      console.log('API Success:', data);
-    },
   });
+
+  // Отладочная информация
+  console.log('Query state:', { data, isLoading, error });
 
   const handleFiltersChange = (newFilters: Partial<QueryProductsDto>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
