@@ -2,9 +2,9 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "npm run db:migrate && npm run start:prod"
-# healthcheckPath = "/"  # Закомментировать
-healthcheckTimeout = 300  # Увеличить с 300 до 600 секунд
+startCommand = "npx prisma migrate deploy && echo '--- Printing environment variables ---' && printenv && echo '--- Starting application ---' && npm run start:prod"
+# healthcheckPath = "/api/health" # Рекомендуется добавить эндпоинт для проверки здоровья
+healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
