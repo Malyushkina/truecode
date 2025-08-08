@@ -37,4 +37,4 @@ RUN chmod +x start.sh
 EXPOSE 3000
 
 # Команда по умолчанию: production режим с возможностью seed
-CMD ["./start.sh"] 
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_DATABASE\" = \"true\" ]; then npm run db:seed; fi && npm run start:prod"] 
