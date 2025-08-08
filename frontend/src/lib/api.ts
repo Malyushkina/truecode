@@ -11,7 +11,8 @@ import {
  * API клиент для работы с backend
  * Использует axios для HTTP запросов
  */
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_URL || 'https://truecode.onrender.com';
 const api = axios.create({
   baseURL: apiBaseUrl,
   headers: {
@@ -37,8 +38,19 @@ export const productsApi = {
     if (query.minPrice) params.append('minPrice', query.minPrice.toString());
     if (query.maxPrice) params.append('maxPrice', query.maxPrice.toString());
 
-    const response = await api.get(`/products?${params.toString()}`);
-    return response.data;
+    console.log(
+      '🌐 API Request:',
+      `${apiBaseUrl}/products?${params.toString()}`
+    );
+
+    try {
+      const response = await api.get(`/products?${params.toString()}`);
+      console.log('✅ API Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ API Error:', error);
+      throw error;
+    }
   },
 
   /**

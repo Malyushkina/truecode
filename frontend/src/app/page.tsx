@@ -23,6 +23,13 @@ export default function HomePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['products', filters],
     queryFn: () => productsApi.getProducts(filters),
+    retry: 1,
+    onError: (error) => {
+      console.error('API Error:', error);
+    },
+    onSuccess: (data) => {
+      console.log('API Success:', data);
+    },
   });
 
   const handleFiltersChange = (newFilters: Partial<QueryProductsDto>) => {

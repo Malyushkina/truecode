@@ -26,8 +26,8 @@ async function bootstrap() {
           'http://localhost:3000',
           'http://localhost:3002',
           'http://localhost:3001',
-          'https://your-frontend-domain.vercel.app', // Замените на ваш домен
-          'https://truecode-frontend.vercel.app', // Пример домена
+          'https://truecode-o6h8-8bbajkwz7-evgs-projects-ab81fb84.vercel.app',
+          'https://truecode-frontend.vercel.app',
         ];
 
     // Настраиваем CORS для разрешения запросов с frontend
