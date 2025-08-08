@@ -28,9 +28,13 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/tsconfig*.json ./
+COPY --from=builder /app/start.sh ./
+
+# Делаем скрипт исполняемым
+RUN chmod +x start.sh
 
 # Экспонируем порт приложения
 EXPOSE 3000
 
-# Команда по умолчанию: production режим
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"] 
+# Команда по умолчанию: production режим с возможностью seed
+CMD ["./start.sh"] 
