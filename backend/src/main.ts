@@ -9,46 +9,55 @@ import { join } from 'path';
  * Создает и запускает NestJS приложение
  */
 async function bootstrap() {
-  // Создаем экземпляр приложения из главного модуля
-  const app = await NestFactory.create(AppModule);
+  try {
+    console.log('🚀 Запуск приложения...');
+    console.log('📊 Переменные окружения:');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('PORT:', process.env.PORT);
+    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
 
-  // Получаем разрешенные origins из переменных окружения
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : [
-        'http://localhost:3000',
-        'http://localhost:3002',
-        'http://localhost:3001',
-        'https://your-frontend-domain.vercel.app', // Замените на ваш домен
-        'https://truecode-frontend.vercel.app', // Пример домена
-      ];
+    const app = await NestFactory.create(AppModule);
+    console.log('✅ NestJS приложение создано');
 
-  // Настраиваем CORS для разрешения запросов с frontend
-  app.enableCors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  });
+    // Получаем разрешенные origins из переменных окружения
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : [
+          'http://localhost:3000',
+          'http://localhost:3002',
+          'http://localhost:3001',
+          'https://your-frontend-domain.vercel.app', // Замените на ваш домен
+          'https://truecode-frontend.vercel.app', // Пример домена
+        ];
 
-  // Раздача статики из папки uploads
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+    // Настраиваем CORS для разрешения запросов с frontend
+    app.enableCors({
+      origin: allowedOrigins,
+      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    });
 
-  // Добавляем глобальную валидацию
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true, // Автоматически преобразует входящие данные в типы DTO
-      whitelist: true, // Удаляет свойства, отсутствующие в DTO
-      forbidNonWhitelisted: true, // Запрещает свойства, отсутствующие в DTO
-    }),
-  );
+    // Раздача статики из папки uploads
+    app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
-  // Запускаем сервер на указанном порту
-  // Если PORT не указан в переменных окружения, используем 3000
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  console.log(`🚀 Приложение запущено на порту ${port}`);
-  console.log(`🌍 Режим: ${process.env.NODE_ENV || 'development'}`);
+    // Добавляем глобальную валидацию
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true, // Автоматически преобразует входящие данные в типы DTO
+        whitelist: true, // Удаляет свойства, отсутствующие в DTO
+        forbidNonWhitelisted: true, // Запрещает свойства, отсутствующие в DTO
+      }),
+    );
+
+    const port = process.env.PORT ?? 3000;
+    await app.listen(port);
+    console.log(`🚀 Приложение запущено на порту ${port}`);
+    console.log(`🌍 Режим: ${process.env.NODE_ENV || 'development'}`);
+  } catch (error) {
+    console.error('❌ Ошибка запуска приложения:', error);
+    process.exit(1);
+  }
 }
 
 // Запускаем приложение
