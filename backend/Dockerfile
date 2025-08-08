@@ -10,9 +10,14 @@ RUN npm ci --no-audit --no-fund
 # Копируем исходный код
 COPY . .
 
-# Генерируем Prisma клиент и собираем приложение
-RUN npx prisma generate
+# Очищаем dist и генерируем Prisma клиент
+RUN rm -rf dist && npx prisma generate
+
+# Собираем приложение
 RUN npm run build
+
+# Проверяем, что dist создался
+RUN ls -la dist/
 
 # --- PRODUCTION STAGE ---
 FROM node:22-alpine
@@ -27,9 +32,13 @@ RUN npm ci --no-audit --no-fund
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/tsconfig.json ./
+
+# Проверяем содержимое dist
+RUN ls -la dist/
 
 # Экспонируем порт приложения
 EXPOSE 3000
 
 # Команда по умолчанию: production режим с возможностью seed
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_DATABASE\" = \"true\" ]; then npm run db:seed; fi && node dist/main"] 
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_DATABASE\" = \"true\" ]; then npm run db:seed; fi && node dist/src/main"] 
