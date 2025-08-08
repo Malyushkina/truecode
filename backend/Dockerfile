@@ -23,11 +23,10 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 RUN npm ci --no-audit --no-fund
 
-# Копируем скомпилированный код и конфигурационные файлы
+# Копируем скомпилированный код и ВСЕ необходимые файлы
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/tsconfig*.json ./
 
 # Экспонируем порт приложения

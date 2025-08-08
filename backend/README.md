@@ -96,3 +96,13 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## 🎯 Рекомендуемый способ:
+
+```bash
+<code_block_to_apply_changes_from>
+```
+
+Это освободит порты и позволит протестировать новый Dockerfile! 🚀
+
+Какой способ попробуете?
