@@ -25,10 +25,12 @@ services:
       dockerfile: Dockerfile
     container_name: truecode_backend
     ports:
-      - '3001:3001' # Backend API на порту 3001
+      - '3002:3000' # Проброс хоста 3002 на контейнерный 3000
     environment:
       DATABASE_URL: postgresql://truecode:truecode@postgres:5432/truecode # Строка подключения к БД
       NODE_ENV: development # Режим разработки
+      PORT: 3000
+      BASE_URL: http://backend:3000
     depends_on:
       - postgres # Зависимость от базы данных
     networks:
@@ -36,6 +38,7 @@ services:
     volumes:
       - ./backend:/app # Монтирование кода для hot reload
       - /app/node_modules # Исключение node_modules
+    command: sh -c "sleep 5 && npm run start"
 
   # Frontend приложение (Next.js)
   frontend:
@@ -46,7 +49,7 @@ services:
     ports:
       - '3000:3000' # Frontend на порту 3000
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001 # URL API для frontend
+      NEXT_PUBLIC_API_URL: http://localhost:3002 # URL API из браузера
     depends_on:
       - backend # Зависимость от backend
     networks:

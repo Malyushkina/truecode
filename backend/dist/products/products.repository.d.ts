@@ -1,12 +1,11 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
+import { Prisma } from '@prisma/client';
 export declare class ProductsRepository {
     private prisma;
     constructor(prisma: PrismaService);
     create(data: CreateProductDto): Promise<{
-        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -14,11 +13,12 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
     findMany(query: QueryProductsDto): Promise<{
         products: {
-            id: string;
             name: string;
             description: string | null;
             price: number;
@@ -26,12 +26,13 @@ export declare class ProductsRepository {
             sku: string;
             imageUrl: string | null;
             createdAt: Date;
+            uid: string;
             updatedAt: Date;
+            id: number;
         }[];
         total: number;
     }>;
-    findById(id: string): Promise<{
-        id: string;
+    findByUid(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -39,10 +40,11 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     } | null>;
-    update(id: string, data: UpdateProductDto): Promise<{
-        id: string;
+    updateByUid(uid: string, data: Prisma.ProductUpdateInput): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -50,10 +52,11 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
-    delete(id: string): Promise<{
-        id: string;
+    deleteByUid(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -61,7 +64,9 @@ export declare class ProductsRepository {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
     private buildWhereClause;
 }

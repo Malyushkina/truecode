@@ -2,11 +2,13 @@ import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
+type UploadedFileInfo = {
+    filename: string;
+};
 export declare class ProductsService {
     private repository;
     constructor(repository: ProductsRepository);
     create(createProductDto: CreateProductDto): Promise<{
-        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -14,11 +16,12 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
     findAll(query: QueryProductsDto): Promise<{
         products: {
-            id: string;
             name: string;
             description: string | null;
             price: number;
@@ -26,7 +29,9 @@ export declare class ProductsService {
             sku: string;
             imageUrl: string | null;
             createdAt: Date;
+            uid: string;
             updatedAt: Date;
+            id: number;
         }[];
         pagination: {
             page: number;
@@ -35,8 +40,7 @@ export declare class ProductsService {
             pages: number;
         };
     }>;
-    findOne(id: string): Promise<{
-        id: string;
+    findOne(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -44,10 +48,11 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
-    update(id: string, updateProductDto: UpdateProductDto): Promise<{
-        id: string;
+    update(uid: string, updateProductDto: UpdateProductDto): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -55,10 +60,11 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
-    remove(id: string): Promise<{
-        id: string;
+    remove(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -66,6 +72,34 @@ export declare class ProductsService {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
+    attachImage(uid: string, file: UploadedFileInfo): Promise<{
+        name: string;
+        description: string | null;
+        price: number;
+        discountPrice: number | null;
+        sku: string;
+        imageUrl: string | null;
+        createdAt: Date;
+        uid: string;
+        updatedAt: Date;
+        id: number;
+    }>;
+    detachImage(uid: string): Promise<{
+        name: string;
+        description: string | null;
+        price: number;
+        discountPrice: number | null;
+        sku: string;
+        imageUrl: string | null;
+        createdAt: Date;
+        uid: string;
+        updatedAt: Date;
+        id: number;
+    }>;
+    private deleteLocalImageFileIfExists;
 }
+export {};

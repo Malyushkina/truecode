@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
+import { Prisma } from '@prisma/client';
 
 /**
  * Репозиторий для работы с товарами в базе данных
@@ -60,33 +60,33 @@ export class ProductsRepository {
 
   /**
    * Находит товар по уникальному идентификатору
-   * @param id - уникальный ID товара
+   * @param uid - уникальный UID товара
    * @returns найденный товар или null
    */
-  async findById(id: string) {
-    return this.prisma.product.findUnique({ where: { id } });
+  async findByUid(uid: string) {
+    return this.prisma.product.findUnique({ where: { uid } });
   }
 
   /**
    * Обновляет существующий товар
-   * @param id - уникальный ID товара
+   * @param uid - уникальный UID товара
    * @param data - данные для обновления
    * @returns обновленный товар
    */
-  async update(id: string, data: UpdateProductDto) {
+  async updateByUid(uid: string, data: Prisma.ProductUpdateInput) {
     return this.prisma.product.update({
-      where: { id },
+      where: { uid },
       data,
     });
   }
 
   /**
    * Удаляет товар из базы данных
-   * @param id - уникальный ID товара
+   * @param uid - уникальный UID товара
    * @returns удаленный товар
    */
-  async delete(id: string) {
-    return this.prisma.product.delete({ where: { id } });
+  async deleteByUid(uid: string) {
+    return this.prisma.product.delete({ where: { uid } });
   }
 
   /**
@@ -100,26 +100,28 @@ export class ProductsRepository {
     search?: string,
     minPrice?: number,
     maxPrice?: number,
-  ) {
-    const conditions: Array<Record<string, unknown>> = [];
+  ): Prisma.ProductWhereInput {
+    const conditions: Prisma.ProductWhereInput[] = [];
 
     // Добавляем поиск по названию, описанию и артикулу
     if (search) {
       conditions.push({
         OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { description: { contains: search, mode: 'insensitive' as const } },
-          { sku: { contains: search, mode: 'insensitive' as const } },
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+          { sku: { contains: search, mode: 'insensitive' } },
         ],
       });
     }
 
     // Добавляем фильтрацию по цене
     if (minPrice || maxPrice) {
-      const priceCondition: Record<string, number> = {};
-      if (minPrice && !isNaN(minPrice)) priceCondition.gte = Number(minPrice);
-      if (maxPrice && !isNaN(maxPrice)) priceCondition.lte = Number(maxPrice);
-      conditions.push({ price: priceCondition });
+      const priceCondition: Prisma.FloatFilter = {};
+      if (minPrice && !isNaN(minPrice)) priceCondition.gte = minPrice;
+      if (maxPrice && !isNaN(maxPrice)) priceCondition.lte = maxPrice;
+      if (Object.keys(priceCondition).length > 0) {
+        conditions.push({ price: priceCondition });
+      }
     }
 
     // Возвращаем условия для Prisma

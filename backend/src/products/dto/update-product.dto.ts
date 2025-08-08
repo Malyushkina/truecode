@@ -7,3 +7,4 @@ import { CreateProductDto } from './create-product.dto';
  * Это позволяет обновлять только нужные поля товара
  */
 export class UpdateProductDto extends PartialType(CreateProductDto) {}
+ 

@@ -13,3 +13,4 @@ import { ProductsRepository } from './products.repository';
   providers: [ProductsService, ProductsRepository], // Сервисы для бизнес-логики и работы с БД
 })
 export class ProductsModule {}
+ 

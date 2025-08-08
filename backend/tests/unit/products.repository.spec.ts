@@ -49,7 +49,8 @@ describe('ProductsRepository', () => {
       };
 
       const expectedProduct = {
-        id: 'test-id',
+        id: 1,
+        uid: 'test-uid',
         ...createProductDto,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -75,7 +76,8 @@ describe('ProductsRepository', () => {
 
       const mockProducts = [
         {
-          id: 'test-id',
+          id: 1,
+          uid: 'test-uid-1',
           name: 'Test Product',
           price: 100,
           sku: 'TEST-SKU-001',
@@ -167,11 +169,12 @@ describe('ProductsRepository', () => {
     });
   });
 
-  describe('findById', () => {
-    it('должен возвращать товар по ID', async () => {
-      const productId = 'test-id';
+  describe('findByUid', () => {
+    it('должен возвращать товар по UID', async () => {
+      const productUid = 'test-uid';
       const expectedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -181,24 +184,25 @@ describe('ProductsRepository', () => {
 
       mockPrismaService.product.findUnique.mockResolvedValue(expectedProduct);
 
-      const result = await repository.findById(productId);
+      const result = await repository.findByUid(productUid);
 
       expect(prismaService.product.findUnique).toHaveBeenCalledWith({
-        where: { id: productId },
+        where: { uid: productUid },
       });
       expect(result).toEqual(expectedProduct);
     });
   });
 
-  describe('update', () => {
+  describe('updateByUid', () => {
     it('должен обновлять товар', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const updateProductDto: UpdateProductDto = {
         price: 150,
       };
 
       const updatedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 150,
         sku: 'TEST-SKU-001',
@@ -208,21 +212,22 @@ describe('ProductsRepository', () => {
 
       mockPrismaService.product.update.mockResolvedValue(updatedProduct);
 
-      const result = await repository.update(productId, updateProductDto);
+      const result = await repository.updateByUid(productUid, updateProductDto);
 
       expect(prismaService.product.update).toHaveBeenCalledWith({
-        where: { id: productId },
+        where: { uid: productUid },
         data: updateProductDto,
       });
       expect(result).toEqual(updatedProduct);
     });
   });
 
-  describe('delete', () => {
+  describe('deleteByUid', () => {
     it('должен удалять товар', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const deletedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -232,10 +237,10 @@ describe('ProductsRepository', () => {
 
       mockPrismaService.product.delete.mockResolvedValue(deletedProduct);
 
-      const result = await repository.delete(productId);
+      const result = await repository.deleteByUid(productUid);
 
       expect(prismaService.product.delete).toHaveBeenCalledWith({
-        where: { id: productId },
+        where: { uid: productUid },
       });
       expect(result).toEqual(deletedProduct);
     });

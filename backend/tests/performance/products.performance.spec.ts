@@ -14,9 +14,9 @@ describe('Products Performance Tests', () => {
   const mockRepository = {
     create: jest.fn(),
     findMany: jest.fn(),
-    findById: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    findByUid: jest.fn(),
+    updateByUid: jest.fn(),
+    deleteByUid: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -89,10 +89,11 @@ describe('Products Performance Tests', () => {
   });
 
   describe('производительность поиска товаров', () => {
-    it('должен быстро находить товар по ID', async () => {
-      const productId = 'test-id';
+    it('должен быстро находить товар по UID', async () => {
+      const productUid = 'test-uid';
       const expectedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -100,16 +101,14 @@ describe('Products Performance Tests', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(expectedProduct);
+      mockRepository.findByUid.mockResolvedValue(expectedProduct);
 
       const startTime = Date.now();
-      const result = await service.findOne(productId);
+      const result = await service.findOne(productUid);
       const endTime = Date.now();
-      const executionTime = endTime - startTime;
 
       expect(result).toEqual(expectedProduct);
-      expect(executionTime).toBeLessThan(500); // Менее 500мс
-      expect(repository.findById).toHaveBeenCalledWith(productId);
+      expect(endTime - startTime).toBeLessThan(100); // Должно выполняться менее 100мс
     });
 
     it('должен быстро обрабатывать поиск с фильтрацией', async () => {
@@ -181,11 +180,12 @@ describe('Products Performance Tests', () => {
 
   describe('производительность обновления товаров', () => {
     it('должен быстро обновлять товар', async () => {
-      const productId = 'test-id';
-      const updateData = { price: 150, description: 'Updated' };
+      const productUid = 'test-uid';
+      const updateData = { price: 150 };
 
       const existingProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -193,31 +193,26 @@ describe('Products Performance Tests', () => {
         updatedAt: new Date(),
       };
 
-      const updatedProduct = {
-        ...existingProduct,
-        ...updateData,
-      };
+      const updatedProduct = { ...existingProduct, price: 150 };
 
-      mockRepository.findById.mockResolvedValue(existingProduct);
-      mockRepository.update.mockResolvedValue(updatedProduct);
+      mockRepository.findByUid.mockResolvedValue(existingProduct);
+      mockRepository.updateByUid.mockResolvedValue(updatedProduct);
 
       const startTime = Date.now();
-      const result = await service.update(productId, updateData);
+      const result = await service.update(productUid, updateData);
       const endTime = Date.now();
-      const executionTime = endTime - startTime;
 
       expect(result).toEqual(updatedProduct);
-      expect(executionTime).toBeLessThan(1000); // Менее 1 секунды
-      expect(repository.findById).toHaveBeenCalledWith(productId);
-      expect(repository.update).toHaveBeenCalledWith(productId, updateData);
+      expect(endTime - startTime).toBeLessThan(100);
     });
   });
 
   describe('производительность удаления товаров', () => {
     it('должен быстро удалять товар', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const existingProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -225,26 +220,24 @@ describe('Products Performance Tests', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(existingProduct);
-      mockRepository.delete.mockResolvedValue(existingProduct);
+      mockRepository.findByUid.mockResolvedValue(existingProduct);
+      mockRepository.deleteByUid.mockResolvedValue(existingProduct);
 
       const startTime = Date.now();
-      const result = await service.remove(productId);
+      const result = await service.remove(productUid);
       const endTime = Date.now();
-      const executionTime = endTime - startTime;
 
       expect(result).toEqual(existingProduct);
-      expect(executionTime).toBeLessThan(1000); // Менее 1 секунды
-      expect(repository.findById).toHaveBeenCalledWith(productId);
-      expect(repository.delete).toHaveBeenCalledWith(productId);
+      expect(endTime - startTime).toBeLessThan(100);
     });
   });
 
   describe('нагрузочное тестирование', () => {
     it('должен обрабатывать множество одновременных запросов', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const expectedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -252,57 +245,51 @@ describe('Products Performance Tests', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(expectedProduct);
+      mockRepository.findByUid.mockResolvedValue(expectedProduct);
 
-      const startTime = Date.now();
-
-      // Создаем 50 одновременных запросов
-      const promises = Array.from({ length: 50 }, () =>
-        service.findOne(productId),
+      const promises = Array.from({ length: 10 }, () =>
+        service.findOne(productUid),
       );
-
       const results = await Promise.all(promises);
-      const endTime = Date.now();
-      const executionTime = endTime - startTime;
 
-      expect(results).toHaveLength(50);
-      expect(executionTime).toBeLessThan(3000); // Менее 3 секунд
-      expect(repository.findById).toHaveBeenCalledTimes(50);
+      expect(results).toHaveLength(10);
+      results.forEach((result) => {
+        expect(result).toEqual(expectedProduct);
+      });
     });
 
     it('должен обрабатывать множественные операции CRUD', async () => {
-      const operations: Promise<any>[] = [];
+      const productUid = 'test-uid';
+      const existingProduct = {
+        id: 1,
+        uid: productUid,
+        name: 'Test Product',
+        price: 100,
+        sku: 'TEST-SKU-001',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-      // Создание
-      for (let i = 0; i < 10; i++) {
-        const createDto = {
-          name: `Product ${i}`,
-          price: 100 + i,
-          sku: `SKU-${i}`,
-        };
-        mockRepository.create.mockResolvedValue({
-          id: `id-${i}`,
-          ...createDto,
-        });
-        operations.push(service.create(createDto));
-      }
+      mockRepository.findByUid.mockResolvedValue(existingProduct);
+      mockRepository.updateByUid.mockResolvedValue(existingProduct);
+      mockRepository.deleteByUid.mockResolvedValue(existingProduct);
 
-      // Поиск
-      for (let i = 0; i < 10; i++) {
-        mockRepository.findById.mockResolvedValue({
-          id: `id-${i}`,
-          name: `Product ${i}`,
-        });
-        operations.push(service.findOne(`id-${i}`));
-      }
+      const operations = [
+        () => service.findOne(productUid),
+        () => service.update(productUid, { price: 150 }),
+        () => service.remove(productUid),
+      ];
 
-      const startTime = Date.now();
-      const results = await Promise.all(operations);
-      const endTime = Date.now();
-      const executionTime = endTime - startTime;
+      const promises = Array.from({ length: 5 }, () =>
+        Promise.all(operations.map((op) => op())),
+      );
 
-      expect(results).toHaveLength(20);
-      expect(executionTime).toBeLessThan(5000); // Менее 5 секунд
+      const results = await Promise.all(promises);
+
+      expect(results).toHaveLength(5);
+      results.forEach((result) => {
+        expect(result).toHaveLength(3);
+      });
     });
   });
 

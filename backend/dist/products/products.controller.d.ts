@@ -6,7 +6,6 @@ export declare class ProductsController {
     private readonly productsService;
     constructor(productsService: ProductsService);
     create(createProductDto: CreateProductDto): Promise<{
-        id: string;
         name: string;
         description: string | null;
         price: number;
@@ -14,11 +13,39 @@ export declare class ProductsController {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
+    }>;
+    uploadImage(uid: string, file?: {
+        filename: string;
+        mimetype?: string;
+    }): Promise<{
+        name: string;
+        description: string | null;
+        price: number;
+        discountPrice: number | null;
+        sku: string;
+        imageUrl: string | null;
+        createdAt: Date;
+        uid: string;
+        updatedAt: Date;
+        id: number;
+    }>;
+    deleteImage(uid: string): Promise<{
+        name: string;
+        description: string | null;
+        price: number;
+        discountPrice: number | null;
+        sku: string;
+        imageUrl: string | null;
+        createdAt: Date;
+        uid: string;
+        updatedAt: Date;
+        id: number;
     }>;
     findAll(query: QueryProductsDto): Promise<{
         products: {
-            id: string;
             name: string;
             description: string | null;
             price: number;
@@ -26,7 +53,9 @@ export declare class ProductsController {
             sku: string;
             imageUrl: string | null;
             createdAt: Date;
+            uid: string;
             updatedAt: Date;
+            id: number;
         }[];
         pagination: {
             page: number;
@@ -35,8 +64,7 @@ export declare class ProductsController {
             pages: number;
         };
     }>;
-    findOne(id: string): Promise<{
-        id: string;
+    findOne(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -44,10 +72,11 @@ export declare class ProductsController {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
-    update(id: string, updateProductDto: UpdateProductDto): Promise<{
-        id: string;
+    update(uid: string, updateProductDto: UpdateProductDto): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -55,10 +84,11 @@ export declare class ProductsController {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
-    remove(id: string): Promise<{
-        id: string;
+    remove(uid: string): Promise<{
         name: string;
         description: string | null;
         price: number;
@@ -66,6 +96,8 @@ export declare class ProductsController {
         sku: string;
         imageUrl: string | null;
         createdAt: Date;
+        uid: string;
         updatedAt: Date;
+        id: number;
     }>;
 }

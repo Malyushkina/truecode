@@ -35,17 +35,17 @@ let ProductsRepository = class ProductsRepository {
         ]);
         return { products, total };
     }
-    async findById(id) {
-        return this.prisma.product.findUnique({ where: { id } });
+    async findByUid(uid) {
+        return this.prisma.product.findUnique({ where: { uid } });
     }
-    async update(id, data) {
+    async updateByUid(uid, data) {
         return this.prisma.product.update({
-            where: { id },
+            where: { uid },
             data,
         });
     }
-    async delete(id) {
-        return this.prisma.product.delete({ where: { id } });
+    async deleteByUid(uid) {
+        return this.prisma.product.delete({ where: { uid } });
     }
     buildWhereClause(search, minPrice, maxPrice) {
         const conditions = [];
@@ -61,10 +61,12 @@ let ProductsRepository = class ProductsRepository {
         if (minPrice || maxPrice) {
             const priceCondition = {};
             if (minPrice && !isNaN(minPrice))
-                priceCondition.gte = Number(minPrice);
+                priceCondition.gte = minPrice;
             if (maxPrice && !isNaN(maxPrice))
-                priceCondition.lte = Number(maxPrice);
-            conditions.push({ price: priceCondition });
+                priceCondition.lte = maxPrice;
+            if (Object.keys(priceCondition).length > 0) {
+                conditions.push({ price: priceCondition });
+            }
         }
         return conditions.length > 0 ? { AND: conditions } : {};
     }

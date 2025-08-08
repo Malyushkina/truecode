@@ -14,30 +14,33 @@ datasource db {
 }
 
 model Product {
-  /// Уникальный ID записи
-  id String @id @default(cuid())
-  
+  /// Уникальный ID записи (автоинкрементное целое число)
+  id Int @id @default(autoincrement())
+
+  /// Уникальный строковый идентификатор
+  uid String @unique @default(cuid())
+
   /// Название товара
   name String
-  
+
   /// Описание товара
   description String?
-  
+
   /// Основная цена
   price Float
-  
+
   /// Цена со скидкой
   discountPrice Float?
-  
+
   /// Артикул товара (уникальный)
   sku String @unique
-  
+
   /// Путь к изображению
   imageUrl String?
-  
+
   /// Дата создания
   createdAt DateTime @default(now())
-  
+
   /// Дата обновления
   updatedAt DateTime @updatedAt
 }

@@ -13,9 +13,9 @@ describe('ProductsService', () => {
   const mockRepository = {
     create: jest.fn(),
     findMany: jest.fn(),
-    findById: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    findByUid: jest.fn(),
+    updateByUid: jest.fn(),
+    deleteByUid: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -47,7 +47,8 @@ describe('ProductsService', () => {
       };
 
       const expectedProduct = {
-        id: 'test-id',
+        id: 1,
+        uid: 'test-uid',
         ...createProductDto,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -72,7 +73,8 @@ describe('ProductsService', () => {
       const mockResult = {
         products: [
           {
-            id: 'test-id',
+            id: 1,
+            uid: 'test-uid',
             name: 'Test Product',
             price: 100,
             sku: 'TEST-SKU-001',
@@ -101,10 +103,11 @@ describe('ProductsService', () => {
   });
 
   describe('findOne', () => {
-    it('должен возвращать товар по ID', async () => {
-      const productId = 'test-id';
+    it('должен возвращать товар по UID', async () => {
+      const productUid = 'test-uid';
       const expectedProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -112,35 +115,36 @@ describe('ProductsService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(expectedProduct);
+      mockRepository.findByUid.mockResolvedValue(expectedProduct);
 
-      const result = await service.findOne(productId);
+      const result = await service.findOne(productUid);
 
-      expect(repository.findById).toHaveBeenCalledWith(productId);
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
       expect(result).toEqual(expectedProduct);
     });
 
     it('должен выбрасывать NotFoundException если товар не найден', async () => {
-      const productId = 'non-existent-id';
+      const productUid = 'non-existent-uid';
 
-      mockRepository.findById.mockResolvedValue(null);
+      mockRepository.findByUid.mockResolvedValue(null);
 
-      await expect(service.findOne(productId)).rejects.toThrow(
+      await expect(service.findOne(productUid)).rejects.toThrow(
         NotFoundException,
       );
-      expect(repository.findById).toHaveBeenCalledWith(productId);
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
     });
   });
 
   describe('update', () => {
     it('должен обновлять существующий товар', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const updateProductDto: UpdateProductDto = {
         price: 150,
       };
 
       const existingProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -153,39 +157,40 @@ describe('ProductsService', () => {
         price: 150,
       };
 
-      mockRepository.findById.mockResolvedValue(existingProduct);
-      mockRepository.update.mockResolvedValue(updatedProduct);
+      mockRepository.findByUid.mockResolvedValue(existingProduct);
+      mockRepository.updateByUid.mockResolvedValue(updatedProduct);
 
-      const result = await service.update(productId, updateProductDto);
+      const result = await service.update(productUid, updateProductDto);
 
-      expect(repository.findById).toHaveBeenCalledWith(productId);
-      expect(repository.update).toHaveBeenCalledWith(
-        productId,
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
+      expect(repository.updateByUid).toHaveBeenCalledWith(
+        productUid,
         updateProductDto,
       );
       expect(result).toEqual(updatedProduct);
     });
 
     it('должен выбрасывать NotFoundException если товар не найден при обновлении', async () => {
-      const productId = 'non-existent-id';
+      const productUid = 'non-existent-uid';
       const updateProductDto: UpdateProductDto = {
         price: 150,
       };
 
-      mockRepository.findById.mockResolvedValue(null);
+      mockRepository.findByUid.mockResolvedValue(null);
 
-      await expect(service.update(productId, updateProductDto)).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(repository.findById).toHaveBeenCalledWith(productId);
+      await expect(
+        service.update(productUid, updateProductDto),
+      ).rejects.toThrow(NotFoundException);
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
     });
   });
 
   describe('remove', () => {
     it('должен удалять существующий товар', async () => {
-      const productId = 'test-id';
+      const productUid = 'test-uid';
       const existingProduct = {
-        id: productId,
+        id: 1,
+        uid: productUid,
         name: 'Test Product',
         price: 100,
         sku: 'TEST-SKU-001',
@@ -193,25 +198,25 @@ describe('ProductsService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(existingProduct);
-      mockRepository.delete.mockResolvedValue(existingProduct);
+      mockRepository.findByUid.mockResolvedValue(existingProduct);
+      mockRepository.deleteByUid.mockResolvedValue(existingProduct);
 
-      const result = await service.remove(productId);
+      const result = await service.remove(productUid);
 
-      expect(repository.findById).toHaveBeenCalledWith(productId);
-      expect(repository.delete).toHaveBeenCalledWith(productId);
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
+      expect(repository.deleteByUid).toHaveBeenCalledWith(productUid);
       expect(result).toEqual(existingProduct);
     });
 
     it('должен выбрасывать NotFoundException если товар не найден при удалении', async () => {
-      const productId = 'non-existent-id';
+      const productUid = 'non-existent-uid';
 
-      mockRepository.findById.mockResolvedValue(null);
+      mockRepository.findByUid.mockResolvedValue(null);
 
-      await expect(service.remove(productId)).rejects.toThrow(
+      await expect(service.remove(productUid)).rejects.toThrow(
         NotFoundException,
       );
-      expect(repository.findById).toHaveBeenCalledWith(productId);
+      expect(repository.findByUid).toHaveBeenCalledWith(productUid);
     });
   });
 });

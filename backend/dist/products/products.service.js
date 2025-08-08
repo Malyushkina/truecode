@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsService = void 0;
 const common_1 = require("@nestjs/common");
 const products_repository_1 = require("./products.repository");
+const fs_1 = require("fs");
+const path_1 = require("path");
 let ProductsService = class ProductsService {
     repository;
     constructor(repository) {
@@ -33,20 +35,47 @@ let ProductsService = class ProductsService {
             },
         };
     }
-    async findOne(id) {
-        const product = await this.repository.findById(id);
+    async findOne(uid) {
+        const product = await this.repository.findByUid(uid);
         if (!product) {
-            throw new common_1.NotFoundException(`Товар с ID ${id} не найден`);
+            throw new common_1.NotFoundException(`Товар с UID ${uid} не найден`);
         }
         return product;
     }
-    async update(id, updateProductDto) {
-        await this.findOne(id);
-        return this.repository.update(id, updateProductDto);
+    async update(uid, updateProductDto) {
+        await this.findOne(uid);
+        return this.repository.updateByUid(uid, updateProductDto);
     }
-    async remove(id) {
-        await this.findOne(id);
-        return this.repository.delete(id);
+    async remove(uid) {
+        await this.findOne(uid);
+        return this.repository.deleteByUid(uid);
+    }
+    async attachImage(uid, file) {
+        const product = await this.findOne(uid);
+        await this.deleteLocalImageFileIfExists(product.imageUrl);
+        const baseUrl = process.env.BASE_URL ?? 'http://localhost:3002';
+        const imageUrl = `${baseUrl}/uploads/${file.filename}`;
+        return this.repository.updateByUid(uid, { imageUrl });
+    }
+    async detachImage(uid) {
+        const product = await this.findOne(uid);
+        await this.deleteLocalImageFileIfExists(product.imageUrl);
+        return this.repository.updateByUid(uid, { imageUrl: null });
+    }
+    async deleteLocalImageFileIfExists(imageUrl) {
+        if (!imageUrl)
+            return;
+        const uploadsMarker = '/uploads/';
+        const markerIndex = imageUrl.indexOf(uploadsMarker);
+        if (markerIndex === -1)
+            return;
+        const filename = imageUrl.substring(markerIndex + uploadsMarker.length);
+        const filePath = (0, path_1.join)(process.cwd(), 'uploads', filename);
+        try {
+            await fs_1.promises.unlink(filePath);
+        }
+        catch {
+        }
     }
 };
 exports.ProductsService = ProductsService;

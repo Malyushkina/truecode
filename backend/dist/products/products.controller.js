@@ -14,10 +14,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const path_1 = require("path");
 const products_service_1 = require("./products.service");
 const create_product_dto_1 = require("./dto/create-product.dto");
 const update_product_dto_1 = require("./dto/update-product.dto");
 const query_products_dto_1 = require("./dto/query-products.dto");
+const fs_1 = require("fs");
+const uploadsDir = (0, path_1.join)(process.cwd(), 'uploads');
+(0, fs_1.mkdirSync)(uploadsDir, { recursive: true });
 let ProductsController = class ProductsController {
     productsService;
     constructor(productsService) {
@@ -26,17 +31,33 @@ let ProductsController = class ProductsController {
     create(createProductDto) {
         return this.productsService.create(createProductDto);
     }
+    async uploadImage(uid, file) {
+        const allowed = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'image/svg+xml',
+        ];
+        if (!file || !file.mimetype || !allowed.includes(file.mimetype)) {
+            throw new common_1.BadRequestException('Неверный тип файла. Допустимы: jpg, png, webp, gif, svg.');
+        }
+        return this.productsService.attachImage(uid, file);
+    }
+    async deleteImage(uid) {
+        return await this.productsService.detachImage(uid);
+    }
     findAll(query) {
         return this.productsService.findAll(query);
     }
-    findOne(id) {
-        return this.productsService.findOne(id);
+    findOne(uid) {
+        return this.productsService.findOne(uid);
     }
-    update(id, updateProductDto) {
-        return this.productsService.update(id, updateProductDto);
+    update(uid, updateProductDto) {
+        return this.productsService.update(uid, updateProductDto);
     }
-    remove(id) {
-        return this.productsService.remove(id);
+    remove(uid) {
+        return this.productsService.remove(uid);
     }
 };
 exports.ProductsController = ProductsController;
@@ -48,6 +69,25 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "create", null);
 __decorate([
+    (0, common_1.Post)(':uid/image'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        dest: uploadsDir,
+        limits: { fileSize: 10 * 1024 * 1024 },
+    })),
+    __param(0, (0, common_1.Param)('uid')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "uploadImage", null);
+__decorate([
+    (0, common_1.Delete)(':uid/image'),
+    __param(0, (0, common_1.Param)('uid')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "deleteImage", null);
+__decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -55,23 +95,23 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':uid'),
+    __param(0, (0, common_1.Param)('uid')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)(':uid'),
+    __param(0, (0, common_1.Param)('uid')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_product_dto_1.UpdateProductDto]),
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':uid'),
+    __param(0, (0, common_1.Param)('uid')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)

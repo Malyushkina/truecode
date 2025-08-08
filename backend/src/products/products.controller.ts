@@ -7,11 +7,20 @@ import {
   Param,
   Delete,
   Query,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { join } from 'path';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
+import { mkdirSync } from 'fs';
+
+const uploadsDir = join(process.cwd(), 'uploads');
+mkdirSync(uploadsDir, { recursive: true });
 
 /**
  * Контроллер для работы с товарами
@@ -25,8 +34,6 @@ export class ProductsController {
   /**
    * POST /products
    * Создает новый товар
-   * @param createProductDto - данные товара из тела запроса
-   * @returns созданный товар
    */
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
@@ -34,10 +41,46 @@ export class ProductsController {
   }
 
   /**
+   * POST /products/:uid/image
+   * Загружает изображение для товара
+   */
+  @Post(':uid/image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      dest: uploadsDir,
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async uploadImage(
+    @Param('uid') uid: string,
+    @UploadedFile() file?: { filename: string; mimetype?: string },
+  ) {
+    const allowed = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/svg+xml',
+    ];
+    if (!file || !file.mimetype || !allowed.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Неверный тип файла. Допустимы: jpg, png, webp, gif, svg.',
+      );
+    }
+    return this.productsService.attachImage(uid, file);
+  }
+
+  /**
+   * DELETE /products/:uid/image
+   * Удаляет изображение у товара
+   */
+  @Delete(':uid/image')
+  async deleteImage(@Param('uid') uid: string) {
+    return await this.productsService.detachImage(uid);
+  }
+
+  /**
    * GET /products
-   * Получает список товаров с пагинацией, фильтрацией и сортировкой
-   * @param query - параметры запроса из URL (page, limit, search, sortBy, etc.)
-   * @returns объект с товарами и информацией о пагинации
    */
   @Get()
   findAll(@Query() query: QueryProductsDto) {
@@ -45,36 +88,29 @@ export class ProductsController {
   }
 
   /**
-   * GET /products/:id
-   * Получает товар по уникальному идентификатору
-   * @param id - ID товара из URL параметра
-   * @returns найденный товар
+   * GET /products/:uid
    */
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  @Get(':uid')
+  findOne(@Param('uid') uid: string) {
+    return this.productsService.findOne(uid);
   }
 
   /**
-   * PATCH /products/:id
-   * Обновляет существующий товар
-   * @param id - ID товара из URL параметра
-   * @param updateProductDto - данные для обновления из тела запроса
-   * @returns обновленный товар
+   * PATCH /products/:uid
    */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  @Patch(':uid')
+  update(
+    @Param('uid') uid: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    return this.productsService.update(uid, updateProductDto);
   }
 
   /**
-   * DELETE /products/:id
-   * Удаляет товар
-   * @param id - ID товара из URL параметра
-   * @returns удаленный товар
+   * DELETE /products/:uid
    */
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+  @Delete(':uid')
+  remove(@Param('uid') uid: string) {
+    return this.productsService.remove(uid);
   }
 }

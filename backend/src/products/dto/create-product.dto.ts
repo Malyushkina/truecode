@@ -32,3 +32,4 @@ export class CreateProductDto {
   @IsUrl()
   imageUrl?: string;
 }
+ 
