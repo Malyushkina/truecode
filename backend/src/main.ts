@@ -34,7 +34,7 @@ async function bootstrap() {
 
     // Настраиваем CORS для разрешения запросов с frontend
     app.enableCors({
-      origin: allowedOrigins,
+      origin: true, // Разрешаем все origins временно
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
