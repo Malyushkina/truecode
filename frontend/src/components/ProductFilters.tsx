@@ -42,6 +42,7 @@ export default function ProductFilters({
       minPrice: undefined,
       maxPrice: undefined,
     });
+    setIsExpanded(false);
   };
 
   const hasActiveFilters =
@@ -99,6 +100,25 @@ export default function ProductFilters({
           Фильтры
         </button>
 
+        {/* Количество на странице (вынесено из раскрытой секции) */}
+        <div className='flex items-center gap-2'>
+          <span className='text-sm text-gray-600'>На странице:</span>
+          <select
+            value={filters.limit || 12}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              onFiltersChange({ limit: val === 0 ? 1000 : val });
+            }}
+            className='px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+          >
+            <option value={0}>Все</option>
+            <option value={6}>6</option>
+            <option value={12}>12</option>
+            <option value={24}>24</option>
+            <option value={48}>48</option>
+          </select>
+        </div>
+
         {/* Очистить фильтры */}
         {hasActiveFilters && (
           <button
@@ -148,24 +168,8 @@ export default function ProductFilters({
               </div>
             </div>
 
-            {/* Количество на странице */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Товаров на странице
-              </label>
-              <select
-                value={filters.limit || 12}
-                onChange={(e) =>
-                  onFiltersChange({ limit: Number(e.target.value) })
-                }
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              >
-                <option value={6}>6</option>
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-                <option value={48}>48</option>
-              </select>
-            </div>
+            {/* Количество на странице — удалено из раскрытой секции */}
+            {/* (перенесено в верхнюю строку рядом с кнопкой "Фильтры") */}
           </div>
         </div>
       )}

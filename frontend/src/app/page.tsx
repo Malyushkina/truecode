@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { productsApi } from '@/lib/api';
 import { QueryProductsDto } from '@/types/product';
-import ProductCard from '@/components/ProductCard';
 import ProductFilters from '@/components/ProductFilters';
 import Pagination from '@/components/Pagination';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Link from 'next/link';
+import ProductList from '@/components/ProductList';
 
 /**
  * Главная страница с каталогом товаров
@@ -24,14 +25,15 @@ export default function HomePage() {
   console.log('🔧 Component loaded');
   console.log('🔧 API URL from lib:', process.env.NEXT_PUBLIC_API_URL);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ['products', filters],
     queryFn: () => productsApi.getProducts(filters),
     retry: 1,
+    placeholderData: (prev) => prev,
   });
 
   // Отладочная информация
-  console.log('Query state:', { data, isLoading, error });
+  console.log('Query state:', { data, isLoading, isFetching, error });
 
   const handleFiltersChange = (newFilters: Partial<QueryProductsDto>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
@@ -41,7 +43,7 @@ export default function HomePage() {
     setFilters((prev) => ({ ...prev, page }));
   };
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className='min-h-screen bg-gray-50'>
         <div className='container mx-auto px-4 py-8'>
@@ -73,13 +75,21 @@ export default function HomePage() {
     <div className='min-h-screen bg-gray-50'>
       <div className='container mx-auto px-4 py-8'>
         {/* Заголовок */}
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-            Каталог товаров
-          </h1>
-          <p className='text-gray-600'>
-            Найдено товаров: {data?.pagination.total || 0}
-          </p>
+        <div className='mb-8 flex items-center justify-between'>
+          <div>
+            <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+              Каталог товаров
+            </h1>
+            <p className='text-gray-600'>
+              Найдено товаров: {data?.pagination.total || 0}
+            </p>
+          </div>
+          <Link
+            href='/products/new'
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+          >
+            Создать товар
+          </Link>
         </div>
 
         {/* Фильтры */}
@@ -89,30 +99,29 @@ export default function HomePage() {
         />
 
         {/* Список товаров */}
-        {data?.products.length === 0 ? (
-          <div className='text-center py-12'>
-            <h2 className='text-xl font-semibold text-gray-600 mb-2'>
-              Товары не найдены
-            </h2>
-            <p className='text-gray-500'>
-              Попробуйте изменить параметры поиска
-            </p>
-          </div>
-        ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8'>
-            {data?.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        {data && (
+          <div
+            className='mb-6'
+            style={{ minHeight: `${(filters.limit ?? 12) * 64 + 48}px` }}
+          >
+            <ProductList products={data.products} />
           </div>
         )}
 
         {/* Пагинация */}
         {data && data.pagination.pages > 1 && (
-          <Pagination
-            currentPage={data.pagination.page}
-            totalPages={data.pagination.pages}
-            onPageChange={handlePageChange}
-          />
+          <div className='mt-6'>
+            <Pagination
+              currentPage={data.pagination.page}
+              totalPages={data.pagination.pages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+
+        {/* Небольшой индикатор фоновой загрузки */}
+        {isFetching && (
+          <div className='mt-4 text-sm text-gray-500'>Обновляем список…</div>
         )}
       </div>
     </div>

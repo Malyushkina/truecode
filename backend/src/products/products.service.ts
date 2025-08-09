@@ -3,8 +3,7 @@ import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
-import { promises as fs } from 'fs';
-import { join } from 'path';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 
 type UploadedFileInfo = { filename: string };
 
@@ -80,47 +79,67 @@ export class ProductsService {
     return this.repository.deleteByUid(uid);
   }
 
-  /**
-   * Привязывает изображение к товару: сохраняет URL и удаляет предыдущее
-   */
-  async attachImage(uid: string, file: UploadedFileInfo) {
-    const product = await this.findOne(uid);
+  private ensureCloudinaryConfigured() {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+  }
 
-    // Удаляем предыдущее изображение, если было
-    await this.deleteLocalImageFileIfExists(product.imageUrl);
-
-    const baseUrl = process.env.BASE_URL ?? 'http://localhost:3002';
-    const imageUrl = `${baseUrl}/uploads/${file.filename}`;
-
-    return this.repository.updateByUid(uid, { imageUrl });
+  private uploadBufferToCloudinary(buffer: Buffer, folder?: string) {
+    return new Promise<UploadApiResponse>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder },
+        (err, result) => {
+          if (err || !result) return reject(err);
+          resolve(result);
+        },
+      );
+      stream.end(buffer);
+    });
   }
 
   /**
-   * Удаляет изображение у товара и чистит файл на диске
+   * Привязывает изображение к товару: загружает в Cloudinary, сохраняет URL/publicId
+   */
+  async attachImage(uid: string, file: Express.Multer.File) {
+    this.ensureCloudinaryConfigured();
+    const product = await this.findOne(uid);
+
+    // Удаляем предыдущее изображение в Cloudinary
+    if ((product as any).imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy((product as any).imagePublicId);
+      } catch {}
+    }
+
+    const folder = process.env.CLOUDINARY_FOLDER ?? 'products';
+    const result = await this.uploadBufferToCloudinary(file.buffer, folder);
+
+    return this.repository.updateByUid(uid, {
+      imageUrl: result.secure_url,
+      imagePublicId: result.public_id,
+    });
+  }
+
+  /**
+   * Удаляет изображение у товара в Cloudinary
    */
   async detachImage(uid: string) {
+    this.ensureCloudinaryConfigured();
     const product = await this.findOne(uid);
 
-    await this.deleteLocalImageFileIfExists(product.imageUrl);
-
-    // Принудительно задаем null в imageUrl
-    return this.repository.updateByUid(uid, { imageUrl: null });
-  }
-
-  private async deleteLocalImageFileIfExists(imageUrl?: string | null) {
-    if (!imageUrl) return;
-
-    const uploadsMarker = '/uploads/';
-    const markerIndex = imageUrl.indexOf(uploadsMarker);
-    if (markerIndex === -1) return;
-
-    const filename = imageUrl.substring(markerIndex + uploadsMarker.length);
-    const filePath = join(process.cwd(), 'uploads', filename);
-
-    try {
-      await fs.unlink(filePath);
-    } catch {
-      // игнорируем, если файла нет
+    if ((product as any).imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy((product as any).imagePublicId);
+      } catch {}
     }
+
+    return this.repository.updateByUid(uid, {
+      imageUrl: null,
+      imagePublicId: null,
+    });
   }
 }

@@ -3,11 +3,11 @@
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
-import { Eye, Edit, Trash2, ImagePlus, ImageOff } from 'lucide-react';
-import { productsApi } from '@/lib/api';
-import { useState } from 'react';
-import axios from 'axios';
+import { Eye, Edit, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useProductImage } from '@/hooks/use-product-image';
+import ProductImageControls from '@/components/ProductImageControls';
 
 interface ProductCardProps {
   product: Product;
@@ -26,79 +26,17 @@ export default function ProductCard({
   const hasDiscount =
     product.discountPrice && product.discountPrice < product.price;
 
-  const [isUploading, setIsUploading] = useState(false);
   const [notice, setNotice] = useState<null | {
     type: 'error' | 'success';
     text: string;
   }>(null);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    // Клиентская валидация файла
-    const allowed = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/svg+xml',
-    ];
-    if (!file.type || !allowed.includes(file.type)) {
-      setNotice({
-        type: 'error',
-        text: 'Неверный тип файла. Допустимы: JPG, PNG, WEBP, GIF, SVG.',
-      });
-      e.target.value = '';
-      return;
-    }
-    if (file.size === 0) {
-      setNotice({
-        type: 'error',
-        text: 'Файл пустой (0 байт). Выберите другой файл.',
-      });
-      e.target.value = '';
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setNotice({
-        type: 'error',
-        text: 'Файл слишком большой. Максимум 10 МБ.',
-      });
-      e.target.value = '';
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      await productsApi.uploadImage(product.uid, file);
-      setNotice({ type: 'success', text: 'Изображение загружено.' });
-      // простое обновление страницы, чтобы не тащить стейт
-      window.location.reload();
-    } catch (err: unknown) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ??
-          'Не удалось загрузить изображение.'
-        : 'Не удалось загрузить изображение.';
-      setNotice({ type: 'error', text: message });
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
-    }
-  };
-
-  const handleDeleteImage = async () => {
-    try {
-      await productsApi.deleteImage(product.uid);
-      setNotice({ type: 'success', text: 'Изображение удалено.' });
-      window.location.reload();
-    } catch (err: unknown) {
-      const message = axios.isAxiosError(err)
-        ? (err.response?.data as { message?: string })?.message ??
-          'Не удалось удалить изображение.'
-        : 'Не удалось удалить изображение.';
-      setNotice({ type: 'error', text: message });
-    }
-  };
+  const { upload, removeImage, isUploading, error } = useProductImage(
+    product.uid
+  );
+  useEffect(() => {
+    if (error) setNotice({ type: 'error', text: error });
+    else setNotice(null);
+  }, [error]);
 
   return (
     <div className='bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden'>
@@ -109,36 +47,20 @@ export default function ProductCard({
             src={product.imageUrl}
             alt={product.name}
             fill
-            className='object-cover'
-            sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
+            className='object-contain'
+            sizes='64px'
             priority={false}
           />
         ) : (
           <div className='text-gray-400 text-4xl'>📷</div>
         )}
-
-        {/* Кнопки управления фото */}
-        <div className='absolute bottom-2 right-2 flex gap-2'>
-          <label className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-white/90 border rounded cursor-pointer hover:bg-white'>
-            <ImagePlus size={14} />
-            {isUploading ? 'Загрузка...' : 'Загрузить'}
-            <input
-              type='file'
-              accept='image/*'
-              className='hidden'
-              onChange={handleFileChange}
-            />
-          </label>
-
-          {product.imageUrl && (
-            <button
-              onClick={handleDeleteImage}
-              className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-white/90 border rounded hover:bg-white text-red-600'
-            >
-              <ImageOff size={14} /> Удалить
-            </button>
-          )}
-        </div>
+        <ProductImageControls
+          imageUrl={product.imageUrl}
+          isUploading={isUploading}
+          disabled={false}
+          onUpload={upload}
+          onDelete={removeImage}
+        />
       </div>
 
       {/* Информация о товаре */}

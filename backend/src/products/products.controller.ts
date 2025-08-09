@@ -12,15 +12,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { join } from 'path';
+import multer from 'multer';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
-import { mkdirSync } from 'fs';
-
-const uploadsDir = join(process.cwd(), 'uploads');
-mkdirSync(uploadsDir, { recursive: true });
 
 /**
  * Контроллер для работы с товарами
@@ -47,13 +43,13 @@ export class ProductsController {
   @Post(':uid/image')
   @UseInterceptors(
     FileInterceptor('file', {
-      dest: uploadsDir,
+      storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
   async uploadImage(
     @Param('uid') uid: string,
-    @UploadedFile() file?: { filename: string; mimetype?: string },
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     const allowed = [
       'image/jpeg',
