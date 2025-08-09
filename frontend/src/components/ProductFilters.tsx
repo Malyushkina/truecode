@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { QueryProductsDto } from '@/types/product';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 interface ProductFiltersProps {
   filters: QueryProductsDto;
@@ -96,7 +96,6 @@ export default function ProductFilters({
           onClick={() => setIsExpanded(!isExpanded)}
           className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
         >
-          <Filter size={20} />
           Фильтры
         </button>
 
