@@ -44,4 +44,6 @@ model Product {
   /// Дата обновления
   updatedAt DateTime @updatedAt
 
+  /// Public ID для Cloudinary
+  imagePublicId String?
 }

@@ -74,10 +74,7 @@ export class ProductsRepository {
    * @returns обновленный товар
    */
   async updateByUid(uid: string, data: Prisma.ProductUpdateInput) {
-    return this.prisma.product.update({
-      where: { uid },
-      data,
-    });
+    return this.prisma.product.update({ where: { uid }, data });
   }
 
   /**
