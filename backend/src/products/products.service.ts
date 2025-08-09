@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-
-type UploadedFileInfo = { filename: string };
+import type { Product } from '@prisma/client';
 
 /**
  * Сервис для работы с товарами
@@ -14,6 +13,8 @@ type UploadedFileInfo = { filename: string };
  */
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(private repository: ProductsRepository) {}
 
   /**
@@ -93,7 +94,8 @@ export class ProductsService {
       const stream = cloudinary.uploader.upload_stream(
         { folder },
         (err, result) => {
-          if (err || !result) return reject(err);
+          if (err || !result)
+            return reject(new Error('Cloudinary upload failed'));
           resolve(result);
         },
       );
@@ -106,13 +108,17 @@ export class ProductsService {
    */
   async attachImage(uid: string, file: Express.Multer.File) {
     this.ensureCloudinaryConfigured();
-    const product = await this.findOne(uid);
+    const product: Product = await this.findOne(uid);
 
     // Удаляем предыдущее изображение в Cloudinary
-    if ((product as any).imagePublicId) {
+    if (product.imagePublicId) {
       try {
-        await cloudinary.uploader.destroy((product as any).imagePublicId);
-      } catch {}
+        await cloudinary.uploader.destroy(product.imagePublicId);
+      } catch (error) {
+        this.logger.warn(
+          `Не удалось удалить предыдущее изображение: ${String(error)}`,
+        );
+      }
     }
 
     const folder = process.env.CLOUDINARY_FOLDER ?? 'products';
@@ -129,12 +135,16 @@ export class ProductsService {
    */
   async detachImage(uid: string) {
     this.ensureCloudinaryConfigured();
-    const product = await this.findOne(uid);
+    const product: Product = await this.findOne(uid);
 
-    if ((product as any).imagePublicId) {
+    if (product.imagePublicId) {
       try {
-        await cloudinary.uploader.destroy((product as any).imagePublicId);
-      } catch {}
+        await cloudinary.uploader.destroy(product.imagePublicId);
+      } catch (error) {
+        this.logger.warn(
+          `Не удалось удалить предыдущее изображение: ${String(error)}`,
+        );
+      }
     }
 
     return this.repository.updateByUid(uid, {

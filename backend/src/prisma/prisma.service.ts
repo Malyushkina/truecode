@@ -20,7 +20,6 @@ export class PrismaService
     // Явно логируем использованный URL
     // В тестах лог подавляем
     if (process.env.NODE_ENV !== 'test') {
-      // eslint-disable-next-line no-console
       console.log('📦 Prisma DATABASE_URL:', process.env.DATABASE_URL);
     }
   }

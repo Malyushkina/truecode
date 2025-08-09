@@ -12,7 +12,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import multer from 'multer';
+import { memoryStorage } from 'multer';
+import type { Express } from 'express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -43,22 +44,25 @@ export class ProductsController {
   @Post(':uid/image')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multer.memoryStorage(),
+      storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const allowed = [
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+          'image/svg+xml',
+        ];
+        cb(null, !!file?.mimetype && allowed.includes(file.mimetype));
+      },
     }),
   )
   async uploadImage(
     @Param('uid') uid: string,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const allowed = [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/svg+xml',
-    ];
-    if (!file || !file.mimetype || !allowed.includes(file.mimetype)) {
+    if (!file) {
       throw new BadRequestException(
         'Неверный тип файла. Допустимы: jpg, png, webp, gif, svg.',
       );
