@@ -13,11 +13,13 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import type { Express } from 'express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
+
+// Локальный минимальный тип файла с буфером
+type UploadedFileBuffer = { buffer: Buffer };
 
 /**
  * Контроллер для работы с товарами
@@ -60,7 +62,7 @@ export class ProductsController {
   )
   async uploadImage(
     @Param('uid') uid: string,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() file?: UploadedFileBuffer,
   ) {
     if (!file) {
       throw new BadRequestException(

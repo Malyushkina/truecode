@@ -106,7 +106,7 @@ export class ProductsService {
   /**
    * Привязывает изображение к товару: загружает в Cloudinary, сохраняет URL/publicId
    */
-  async attachImage(uid: string, file: Express.Multer.File) {
+  async attachImage(uid: string, file: { buffer: Buffer }) {
     this.ensureCloudinaryConfigured();
     const product: Product = await this.findOne(uid);
 
