@@ -2,7 +2,6 @@ import {
   validateImageDimensions,
   processImage,
   IMAGE_MIN_PX,
-  IMAGE_MAX_PX,
 } from '@/lib/image-validation';
 
 function makeFile(name: string, type: string, size = 10): File {

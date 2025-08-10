@@ -43,6 +43,12 @@ function isCanceledError(error: unknown): boolean {
   );
 }
 
+// Минимальный тип ошибки от axios для логирования без any
+type AxiosLikeError = {
+  response?: { status?: number };
+  message?: string;
+};
+
 // Добавляем перехватчик для отладки
 api.interceptors.request.use(
   (config) => {
@@ -63,10 +69,10 @@ api.interceptors.response.use(
       console.log('✅ Response:', response.status, response.config.url);
     return response;
   },
-  (error) => {
+  (error: AxiosLikeError) => {
     if (isDev && !isCanceledError(error)) {
-      const status = (error as any)?.response?.status;
-      console.warn('⚠️ Response Error:', status, (error as any)?.message);
+      const status = error?.response?.status;
+      console.warn('⚠️ Response Error:', status, error?.message);
     }
     return Promise.reject(error);
   }
