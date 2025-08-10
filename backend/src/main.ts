@@ -32,16 +32,19 @@ async function bootstrap() {
 
     // Получаем разрешенные origins из переменных окружения
     const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',')
+      ? process.env.ALLOWED_ORIGINS.split(',').map((o) =>
+          o.trim().replace(/\/$/, ''),
+        )
       : [
           'http://localhost:3000',
           'http://localhost:3002',
           'http://localhost:3001',
-          'https://truecode-o6h8-8bbajkwz7-evgs-projects-ab81fb84.vercel.app',
-          'https://truecode-frontend.vercel.app',
         ];
 
-    if (!isProd) console.log('🌍 Allowed Origins:', allowedOrigins);
+    const vercelPattern = /^https:\/\/([a-z0-9-]+)\.vercel\.app$/i;
+
+    if (!isProd)
+      console.log('🌍 Allowed Origins:', allowedOrigins, ' + *.vercel.app');
 
     // Настраиваем CORS для разрешения запросов только из доверенных источников
     const corsOptions: CorsOptions = {
@@ -51,7 +54,11 @@ async function bootstrap() {
           callback(null, true);
           return;
         }
-        if (allowedOrigins.includes(origin)) {
+        const normalized = origin.replace(/\/$/, '');
+        if (
+          allowedOrigins.includes(normalized) ||
+          vercelPattern.test(normalized)
+        ) {
           callback(null, true);
           return;
         }
