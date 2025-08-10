@@ -37,8 +37,7 @@ function isCanceledError(error: unknown): boolean {
   const canceledByAxios =
     typeof (axios as unknown as { isCancel?: (err: unknown) => boolean })
       .isCancel === 'function'
-      ? // @ts-expect-error narrow at runtime
-        (axios.isCancel as (err: unknown) => boolean)(error)
+      ? (axios.isCancel as (err: unknown) => boolean)(error)
       : false;
   const msg = typeof e?.message === 'string' ? e.message.toLowerCase() : '';
   return (
