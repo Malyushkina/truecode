@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import type { Express } from 'express';
+import type { FileFilterCallback } from 'multer';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,6 +21,15 @@ import { QueryProductsDto } from './dto/query-products.dto';
 
 // Локальный минимальный тип файла с буфером
 type UploadedFileBuffer = { buffer: Buffer };
+
+type FileWithMime = { mimetype: unknown };
+function hasMimeType(input: unknown): input is { mimetype: string } {
+  return (
+    typeof input === 'object' &&
+    input !== null &&
+    typeof (input as FileWithMime).mimetype === 'string'
+  );
+}
 
 /**
  * Контроллер для работы с товарами
@@ -49,11 +58,7 @@ export class ProductsController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (
-        _req: unknown,
-        file: Express.Multer.File,
-        cb: (error: Error | null, acceptFile: boolean) => void,
-      ) => {
+      fileFilter: (_req: unknown, file: unknown, cb: FileFilterCallback) => {
         const allowed = [
           'image/jpeg',
           'image/png',
@@ -61,9 +66,9 @@ export class ProductsController {
           'image/gif',
           'image/svg+xml',
         ] as const;
-        const isAllowed =
-          typeof file?.mimetype === 'string' &&
-          allowed.includes(file.mimetype as (typeof allowed)[number]);
+        const isAllowed = hasMimeType(file)
+          ? allowed.includes(file.mimetype as (typeof allowed)[number])
+          : false;
         cb(null, isAllowed);
       },
     }),
