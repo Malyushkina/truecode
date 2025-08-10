@@ -75,8 +75,8 @@ npm run dev
 
 Проект готов к развертыванию на облачных платформах:
 
-- **Frontend**: Vercel, Netlify, GitHub Pages
-- **Backend**: Railway, Render, Heroku
+- **Frontend**: Vercel, Netlify
+- **Backend**: Railway, Render
 - **База данных**: PostgreSQL на Railway/Render
 - **Файловое хранилище**: Cloudinary, AWS S3
 
@@ -93,7 +93,7 @@ truecode/
 │   │   └── main.ts         # Точка входа
 │   ├── prisma/
 │   │   └── schema.prisma   # Схема базы данных
-│   └── tests/              # Тесты
+│   └── __tests__/          # Тесты
 ├── frontend/               # Next.js приложение
 │   ├── src/
 │   │   ├── app/           # App Router
@@ -117,12 +117,16 @@ npm run test:integration  # Integration тесты
 npm run test:performance  # Performance тесты
 ```
 
+Подробнее: [backend/TESTING.md](./backend/TESTING.md)
+
 ### Frontend тесты
 
 ```bash
 cd frontend
 npm run test
 ```
+
+Подробнее: [frontend/TESTING.md](./frontend/TESTING.md)
 
 ## 📊 API Документация
 
@@ -142,7 +146,7 @@ Query параметры:
 - maxPrice: максимальная цена
 ```
 
-#### Получить товар по ID
+#### Получить товар по UID
 
 ```
 GET /products/:uid
@@ -187,10 +191,10 @@ Content-Type: multipart/form-data
 ### Backend
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+DATABASE_URL=postgresql://truecode:truecode@localhost:5433/truecode
 NODE_ENV=development
 PORT=3000
-ALLOWED_ORIGINS=http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3002
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret

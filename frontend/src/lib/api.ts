@@ -12,7 +12,7 @@ import {
  * Использует axios для HTTP запросов
  */
 const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL?.trim() || 'https://truecode.onrender.com';
+  process.env.NEXT_PUBLIC_API_URL?.trim() || 'http://localhost:3002';
 
 const isDev = process.env.NODE_ENV !== 'production';
 if (isDev) {
@@ -34,12 +34,19 @@ const api = axios.create({
 function isCanceledError(error: unknown): boolean {
   // Axios v1: code === 'ERR_CANCELED' + AbortController name/message
   const e = error as { code?: string; name?: string; message?: string };
+  const canceledByAxios =
+    typeof (axios as unknown as { isCancel?: (err: unknown) => boolean })
+      .isCancel === 'function'
+      ? // @ts-expect-error narrow at runtime
+        (axios.isCancel as (err: unknown) => boolean)(error)
+      : false;
+  const msg = typeof e?.message === 'string' ? e.message.toLowerCase() : '';
   return (
-    (axios.isCancel && axios.isCancel(error)) ||
+    canceledByAxios ||
     e?.code === 'ERR_CANCELED' ||
     e?.name === 'CanceledError' ||
-    e?.message?.toLowerCase?.().includes('canceled') ||
-    e?.message?.toLowerCase?.().includes('aborted')
+    msg.includes('canceled') ||
+    msg.includes('aborted')
   );
 }
 

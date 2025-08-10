@@ -24,15 +24,15 @@ function createResponseMock(): ResponseMock {
   return res;
 }
 
-type MinimalHttpArgs = {
+type HttpArgs = {
   getRequest: <T = unknown>() => T;
   getResponse: <T = unknown>() => T;
   getNext: <T = unknown>() => T;
 };
 
 function createHostMock(res: ResponseMock): ArgumentsHost {
-  const http: MinimalHttpArgs = {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  const http: HttpArgs = {
     getRequest: <T = unknown>() => ({}) as T,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     getResponse: <T = unknown>() => res as unknown as T,
