@@ -1,44 +1,45 @@
 # --- BUILDER STAGE ---
 FROM node:22-alpine AS builder
 
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 WORKDIR /app
 
-# Устанавливаем зависимости
+# Устанавливаем зависимости (dev+prod)
 COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 # Копируем исходный код
 COPY . .
 
-# Очищаем dist и генерируем Prisma клиент
+# Генерируем Prisma клиент и собираем приложение
 RUN rm -rf dist && npx prisma generate
-
-# Собираем приложение
 RUN npm run build
 
-# Проверяем, что dist создался
-RUN ls -la dist/
+# Удаляем dev-зависимости, оставляя только production
+RUN npm prune --omit=dev
 
 # --- PRODUCTION STAGE ---
-FROM node:22-alpine
+FROM node:22-alpine AS runner
 
+ENV NODE_ENV=production
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 WORKDIR /app
 
-# Копируем package.json и устанавливаем ВСЕ зависимости (нужны для seed)
+# Копируем только необходимые файлы из билдера
 COPY --from=builder /app/package*.json ./
-RUN npm ci --no-audit --no-fund
-
-# Копируем скомпилированный код и необходимые файлы
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/tsconfig.json ./
 
 # Проверяем содержимое dist
 RUN ls -la dist/
 
-# Экспонируем порт приложения
+# Снижаем привилегии до non-root пользователя
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
+
 EXPOSE 3000
 
-# Команда по умолчанию: production режим с возможностью seed
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"$SEED_DATABASE\" = \"true\" ]; then npm run db:seed; fi && node dist/src/main"] 
+# Команда по умолчанию: применяем миграции и запускаем сервер
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && if [ \"$SEED_DATABASE\" = \"true\" ]; then node prisma/seed.js; fi && node dist/src/main"] 

@@ -17,10 +17,12 @@ export class PrismaService
         db: { url: process.env.DATABASE_URL },
       },
     });
-    // Явно логируем использованный URL
-    // В тестах лог подавляем
+    // Явно логируем наличие DATABASE_URL без раскрытия чувствительных данных
     if (process.env.NODE_ENV !== 'test') {
-      console.log('📦 Prisma DATABASE_URL:', process.env.DATABASE_URL);
+      const maskedUrl = process.env.DATABASE_URL
+        ? process.env.DATABASE_URL.replace(/:\/\/[^@]+@/, '://***:***@')
+        : 'NOT SET';
+      console.log('📦 Prisma DATABASE_URL:', maskedUrl);
     }
   }
 

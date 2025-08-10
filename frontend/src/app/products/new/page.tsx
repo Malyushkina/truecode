@@ -51,7 +51,7 @@ export default function NewProductPage() {
       const toUpload = processed.ok ? processed.file : file;
       await productsApi.uploadImage(created.uid, toUpload as File);
       router.push(`/products/${created.uid}`);
-    } catch (e) {
+    } catch {
       alert(
         'Не удалось создать товар или загрузить изображение. Попробуйте позже.'
       );

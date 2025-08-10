@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { QueryProductsDto } from './dto/query-products.dto';
+import { QueryProductsDto, SortByField } from './dto/query-products.dto';
 import { Prisma } from '@prisma/client';
 
 /**
@@ -32,7 +32,7 @@ export class ProductsRepository {
       page = 1,
       limit = 10,
       search,
-      sortBy = 'createdAt',
+      sortBy = SortByField.createdAt,
       sortOrder = 'desc',
       minPrice,
       maxPrice,
@@ -112,10 +112,12 @@ export class ProductsRepository {
     }
 
     // Добавляем фильтрацию по цене
-    if (minPrice || maxPrice) {
+    if (minPrice !== undefined || maxPrice !== undefined) {
       const priceCondition: Prisma.FloatFilter = {};
-      if (minPrice && !isNaN(minPrice)) priceCondition.gte = minPrice;
-      if (maxPrice && !isNaN(maxPrice)) priceCondition.lte = maxPrice;
+      if (minPrice !== undefined && !isNaN(minPrice))
+        priceCondition.gte = minPrice;
+      if (maxPrice !== undefined && !isNaN(maxPrice))
+        priceCondition.lte = maxPrice;
       if (Object.keys(priceCondition).length > 0) {
         conditions.push({ price: priceCondition });
       }

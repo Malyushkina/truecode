@@ -9,6 +9,12 @@ export enum SortOrder {
   DESC = 'desc', // По убыванию
 }
 
+export enum SortByField {
+  createdAt = 'createdAt',
+  name = 'name',
+  price = 'price',
+}
+
 /**
  * DTO для параметров запроса списка товаров
  * Используется для пагинации, фильтрации и сортировки
@@ -32,7 +38,7 @@ export class QueryProductsDto {
   @IsNumber()
   limit?: number = 10;
 
-  /** Поисковый запрос (поиск по названию, описанию, артикулу) */
+  /** Поисковый запрос (по названию, описанию, артикулу) */
   @IsOptional()
   @IsString()
   search?: string;

@@ -1,3 +1,5 @@
+'use client';
+
 import { ImagePlus, ImageOff } from 'lucide-react';
 
 interface Props {

@@ -14,9 +14,12 @@ import {
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_URL?.trim() || 'https://truecode.onrender.com';
 
-console.log('🔧 API Base URL:', apiBaseUrl);
-console.log('🔧 Environment:', process.env.NODE_ENV);
-console.log('🔧 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+const isDev = process.env.NODE_ENV !== 'production';
+if (isDev) {
+  console.log('🔧 API Base URL:', apiBaseUrl);
+  console.log('🔧 Environment:', process.env.NODE_ENV);
+  console.log('🔧 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+}
 
 // removed hard error on localhost to allow local testing
 
@@ -25,27 +28,46 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000,
 });
+
+function isCanceledError(error: unknown): boolean {
+  // Axios v1: code === 'ERR_CANCELED' + AbortController name/message
+  const e = error as { code?: string; name?: string; message?: string };
+  return (
+    (axios.isCancel && axios.isCancel(error)) ||
+    e?.code === 'ERR_CANCELED' ||
+    e?.name === 'CanceledError' ||
+    e?.message?.toLowerCase?.().includes('canceled') ||
+    e?.message?.toLowerCase?.().includes('aborted')
+  );
+}
 
 // Добавляем перехватчик для отладки
 api.interceptors.request.use(
   (config) => {
-    console.log('🌐 Request:', config.method?.toUpperCase(), config.url);
+    if (isDev)
+      console.log('🌐 Request:', config.method?.toUpperCase(), config.url);
     return config;
   },
   (error) => {
-    console.error('❌ Request Error:', error);
+    if (isDev && !isCanceledError(error))
+      console.warn('⚠️ Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ Response:', response.status, response.config.url);
+    if (isDev)
+      console.log('✅ Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
-    console.error('❌ Response Error:', error.response?.status, error.message);
+    if (isDev && !isCanceledError(error)) {
+      const status = (error as any)?.response?.status;
+      console.warn('⚠️ Response Error:', status, (error as any)?.message);
+    }
     return Promise.reject(error);
   }
 );
@@ -57,7 +79,10 @@ export const productsApi = {
   /**
    * Получить список товаров с пагинацией и фильтрацией
    */
-  async getProducts(query: QueryProductsDto = {}): Promise<ProductsResponse> {
+  async getProducts(
+    query: QueryProductsDto = {},
+    opts?: { signal?: AbortSignal }
+  ): Promise<ProductsResponse> {
     const params = new URLSearchParams();
 
     if (query.page) params.append('page', query.page.toString());
@@ -68,17 +93,22 @@ export const productsApi = {
     if (query.minPrice) params.append('minPrice', query.minPrice.toString());
     if (query.maxPrice) params.append('maxPrice', query.maxPrice.toString());
 
-    console.log(
-      '🌐 API Request:',
-      `${apiBaseUrl}/products?${params.toString()}`
-    );
+    if (isDev) {
+      console.log(
+        '🌐 API Request:',
+        `${apiBaseUrl}/products?${params.toString()}`
+      );
+    }
 
     try {
-      const response = await api.get(`/products?${params.toString()}`);
-      console.log('✅ API Response:', response.data);
+      const response = await api.get(`/products?${params.toString()}`, {
+        signal: opts?.signal,
+      });
+      if (isDev) console.log('✅ API Response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ API Error:', error);
+      if (isDev && !isCanceledError(error))
+        console.warn('⚠️ API Error:', error);
       throw error;
     }
   },
@@ -86,9 +116,20 @@ export const productsApi = {
   /**
    * Получить товар по UID
    */
-  async getProduct(uid: string): Promise<Product> {
-    const response = await api.get(`/products/${uid}`);
-    return response.data;
+  async getProduct(
+    uid: string,
+    opts?: { signal?: AbortSignal }
+  ): Promise<Product> {
+    try {
+      const response = await api.get(`/products/${uid}`, {
+        signal: opts?.signal,
+      });
+      return response.data;
+    } catch (error) {
+      if (isDev && !isCanceledError(error))
+        console.warn('⚠️ API Error:', error);
+      throw error;
+    }
   },
 
   /**

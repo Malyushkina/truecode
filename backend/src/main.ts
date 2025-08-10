@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import express from 'express';
 import { join } from 'path';
+import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { HttpExceptionFilter } from './common/http-exception.filter';
 
 /**
  * Точка входа в приложение
@@ -10,14 +12,23 @@ import { join } from 'path';
  */
 async function bootstrap() {
   try {
-    console.log('🚀 Запуск приложения...');
-    console.log('📊 Переменные окружения:');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('PORT:', process.env.PORT);
-    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+    const isProd = process.env.NODE_ENV === 'production';
+    if (!isProd) {
+      console.log('🚀 Запуск приложения...');
+      console.log('📊 Переменные окружения:');
+      console.log('NODE_ENV:', process.env.NODE_ENV);
+      console.log('PORT:', process.env.PORT);
+      console.log(
+        'DATABASE_URL:',
+        process.env.DATABASE_URL ? 'SET' : 'NOT SET',
+      );
+    }
 
     const app = await NestFactory.create(AppModule);
-    console.log('✅ NestJS приложение создано');
+    if (!isProd) console.log('✅ NestJS приложение создано');
+
+    // Глобальный фильтр исключений
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     // Получаем разрешенные origins из переменных окружения
     const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -30,15 +41,27 @@ async function bootstrap() {
           'https://truecode-frontend.vercel.app',
         ];
 
-    console.log('🌍 Allowed Origins:', allowedOrigins);
+    if (!isProd) console.log('🌍 Allowed Origins:', allowedOrigins);
 
-    // Настраиваем CORS для разрешения запросов с frontend
-    app.enableCors({
-      origin: true, // Разрешаем все origins временно
+    // Настраиваем CORS для разрешения запросов только из доверенных источников
+    const corsOptions: CorsOptions = {
+      origin: (origin, callback) => {
+        // Разрешаем запросы без Origin (например, из curl/Postman)
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error('Not allowed by CORS'));
+      },
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
-    });
+    };
+    app.enableCors(corsOptions);
 
     // Раздача статики из папки uploads
     app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
@@ -54,8 +77,10 @@ async function bootstrap() {
 
     const port = process.env.PORT ?? 3000;
     await app.listen(port);
-    console.log(`🚀 Приложение запущено на порту ${port}`);
-    console.log(`🌍 Режим: ${process.env.NODE_ENV || 'development'}`);
+    if (!isProd) {
+      console.log(`🚀 Приложение запущено на порту ${port}`);
+      console.log(`🌍 Режим: ${process.env.NODE_ENV || 'development'}`);
+    }
   } catch (error) {
     console.error('❌ Ошибка запуска приложения:', error);
     process.exit(1);

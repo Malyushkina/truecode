@@ -3,6 +3,35 @@ import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import v8 from 'node:v8';
+
+// Полифилл structuredClone для старых окружений Node
+if (typeof globalThis.structuredClone !== 'function') {
+  globalThis.structuredClone = (obj) => v8.deserialize(v8.serialize(obj));
+}
+
+// Полифилл AbortSignal.prototype.throwIfAborted для старых Node
+try {
+  if (
+    typeof globalThis.AbortSignal !== 'undefined' &&
+    !('throwIfAborted' in globalThis.AbortSignal.prototype)
+  ) {
+    // eslint-disable-next-line no-extend-native
+    globalThis.AbortSignal.prototype.throwIfAborted =
+      function throwIfAborted() {
+        if (this.aborted) {
+          const reason = /** @type {any} */ (this).reason;
+          const err =
+            reason instanceof Error
+              ? reason
+              : new Error(String(reason ?? 'This operation was aborted'));
+          // @ts-ignore
+          err.name = 'AbortError';
+          throw err;
+        }
+      };
+  }
+} catch {}
 
 export default tseslint.config(
   {

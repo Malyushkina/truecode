@@ -1,10 +1,21 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  ConflictException,
+} from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductsDto } from './dto/query-products.dto';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import type { Product } from '@prisma/client';
+
+function isPrismaUniqueError(err: unknown): err is { code: 'P2002' } {
+  if (typeof err !== 'object' || err === null) return false;
+  const maybe = err as { code?: unknown };
+  return typeof maybe.code === 'string' && maybe.code === 'P2002';
+}
 
 /**
  * Сервис для работы с товарами
@@ -23,7 +34,14 @@ export class ProductsService {
    * @returns созданный товар
    */
   async create(createProductDto: CreateProductDto) {
-    return this.repository.create(createProductDto);
+    try {
+      return await this.repository.create(createProductDto);
+    } catch (error: unknown) {
+      if (isPrismaUniqueError(error)) {
+        throw new ConflictException('Товар с таким SKU уже существует');
+      }
+      throw error;
+    }
   }
 
   /**
@@ -68,7 +86,14 @@ export class ProductsService {
   async update(uid: string, updateProductDto: UpdateProductDto) {
     await this.findOne(uid); // Проверяем существование товара
 
-    return this.repository.updateByUid(uid, updateProductDto);
+    try {
+      return await this.repository.updateByUid(uid, updateProductDto);
+    } catch (error: unknown) {
+      if (isPrismaUniqueError(error)) {
+        throw new ConflictException('Товар с таким SKU уже существует');
+      }
+      throw error;
+    }
   }
 
   /**

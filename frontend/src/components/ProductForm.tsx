@@ -1,4 +1,6 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useId } from 'react';
 
 export type ProductFormMode = 'create' | 'edit';
 
@@ -60,6 +62,12 @@ export default function ProductForm({
       : ''
   );
   const [sku, setSku] = useState(initialValues?.sku ?? '');
+
+  const nameId = useId();
+  const descId = useId();
+  const priceId = useId();
+  const discountId = useId();
+  const skuId = useId();
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -168,10 +176,14 @@ export default function ProductForm({
         <div className='p-8'>
           <form className='space-y-4' onSubmit={handleSubmit}>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label
+                className='block text-sm font-medium text-gray-700 mb-1'
+                htmlFor={nameId}
+              >
                 Название{mode === 'create' ? '*' : ''}
               </label>
               <input
+                id={nameId}
                 type='text'
                 value={name}
                 onChange={(e) => {
@@ -183,10 +195,14 @@ export default function ProductForm({
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label
+                className='block text-sm font-medium text-gray-700 mb-1'
+                htmlFor={descId}
+              >
                 Описание
               </label>
               <textarea
+                id={descId}
                 value={description}
                 onChange={(e) => {
                   setDescription(e.target.value);
@@ -199,10 +215,14 @@ export default function ProductForm({
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                  htmlFor={priceId}
+                >
                   Цена, ₽{mode === 'create' ? '*' : ''}
                 </label>
                 <input
+                  id={priceId}
                   type='number'
                   step='0.01'
                   min='0'
@@ -215,10 +235,14 @@ export default function ProductForm({
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label
+                  className='block text-sm font-medium text-gray-700 mb-1'
+                  htmlFor={discountId}
+                >
                   Цена со скидкой, ₽
                 </label>
                 <input
+                  id={discountId}
                   type='number'
                   step='0.01'
                   min='0'
@@ -233,10 +257,14 @@ export default function ProductForm({
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label
+                className='block text-sm font-medium text-gray-700 mb-1'
+                htmlFor={skuId}
+              >
                 Артикул (SKU){mode === 'create' ? '*' : ''}
               </label>
               <input
+                id={skuId}
                 type='text'
                 value={sku}
                 onChange={(e) => {

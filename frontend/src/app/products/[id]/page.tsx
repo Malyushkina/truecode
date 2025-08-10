@@ -12,6 +12,7 @@ import type { UpdateProductDto } from '@/types/product';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useProductImage } from '@/hooks/use-product-image';
 import ProductImageControls from '@/components/ProductImageControls';
+import Image from 'next/image';
 
 /**
  * Страница отдельного товара
@@ -28,7 +29,7 @@ export default function ProductPage() {
     error,
   } = useQuery({
     queryKey: ['product', productUid],
-    queryFn: () => productsApi.getProduct(productUid),
+    queryFn: ({ signal }) => productsApi.getProduct(productUid, { signal }),
     enabled: !!productUid,
   });
 
@@ -140,7 +141,7 @@ export default function ProductPage() {
 
     try {
       await saveAsync(payload);
-    } catch (e) {
+    } catch {
       setFormError('Не удалось сохранить изменения. Попробуйте позже.');
     }
   };
@@ -224,11 +225,12 @@ export default function ProductPage() {
               )}
               <div className='aspect-square bg-gray-100 rounded-lg flex items-center justify-center relative'>
                 {product.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={product.imageUrl}
                     alt={product.name}
-                    className='w-full h-full object-contain rounded-lg'
+                    fill
+                    sizes='(min-width: 1024px) 50vw, 100vw'
+                    className='object-contain rounded-lg'
                   />
                 ) : (
                   <div className='text-gray-400 text-8xl'>📷</div>

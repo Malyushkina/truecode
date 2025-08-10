@@ -46,4 +46,7 @@ model Product {
 
   /// Public ID для Cloudinary
   imagePublicId String?
+
+  @@index([createdAt], map: "product_createdAt_idx")
+  @@index([price], map: "product_price_idx")
 }

@@ -10,6 +10,8 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Link from 'next/link';
 import ProductList from '@/components/ProductList';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 /**
  * Главная страница с каталогом товаров
  */
@@ -22,18 +24,21 @@ export default function HomePage() {
   });
 
   // Отладочная информация
-  console.log('🔧 Component loaded');
-  console.log('🔧 API URL from lib:', process.env.NEXT_PUBLIC_API_URL);
+  if (isDev) {
+    console.log('🔧 Component loaded');
+    console.log('🔧 API URL from lib:', process.env.NEXT_PUBLIC_API_URL);
+  }
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ['products', filters],
-    queryFn: () => productsApi.getProducts(filters),
+    queryFn: ({ signal }) => productsApi.getProducts(filters, { signal }),
     retry: 1,
     placeholderData: (prev) => prev,
   });
 
   // Отладочная информация
-  console.log('Query state:', { data, isLoading, isFetching, error });
+  if (isDev)
+    console.log('Query state:', { data, isLoading, isFetching, error });
 
   const handleFiltersChange = (newFilters: Partial<QueryProductsDto>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));

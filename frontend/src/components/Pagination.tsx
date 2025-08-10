@@ -54,6 +54,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label='Предыдущая страница'
         className='flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <ChevronLeft size={16} />
@@ -64,10 +65,14 @@ export default function Pagination({
       {visiblePages.map((page, index) => (
         <div key={index}>
           {page === '...' ? (
-            <span className='px-3 py-2 text-gray-500'>...</span>
+            <span className='px-3 py-2 text-gray-500' aria-hidden>
+              ...
+            </span>
           ) : (
             <button
               onClick={() => onPageChange(page as number)}
+              aria-label={`Перейти на страницу ${(page as number).toString()}`}
+              aria-current={currentPage === page ? 'page' : undefined}
               className={`px-3 py-2 text-sm font-medium rounded-lg border ${
                 currentPage === page
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -84,6 +89,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label='Следующая страница'
         className='flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
       >
         Вперед

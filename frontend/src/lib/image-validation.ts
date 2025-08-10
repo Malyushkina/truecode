@@ -137,7 +137,7 @@ export async function processImage(
           ? `Изображение меньше рекомендуемого ${min}px по меньшей стороне.`
           : undefined,
     };
-  } catch (e) {
+  } catch {
     return { ok: false, error: 'Не удалось обработать изображение' };
   }
 }
