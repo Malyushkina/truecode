@@ -11,10 +11,14 @@ import {
  * API клиент для работы с backend
  * Использует axios для HTTP запросов
  */
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL?.trim() || 'http://localhost:3002';
+const isProd = process.env.NODE_ENV === 'production';
+const envApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+if (isProd && (!envApiUrl || envApiUrl.length === 0)) {
+  throw new Error('NEXT_PUBLIC_API_URL is required in production');
+}
+const apiBaseUrl = envApiUrl || 'http://localhost:3002';
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = !isProd;
 if (isDev) {
   console.log('🔧 API Base URL:', apiBaseUrl);
   console.log('🔧 Environment:', process.env.NODE_ENV);
